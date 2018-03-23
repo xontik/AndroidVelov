@@ -20,10 +20,8 @@ public final class Props {
             properties = new Properties();
             properties.load(propertiesStream);
 
-            Log.d("StationListActivity", "apiKey = " + properties.getProperty("API_KEY"));
         } catch (IOException e) {
             e.printStackTrace();
-            Log.e("StationListActivity", e.getMessage());
         }
     }
 
