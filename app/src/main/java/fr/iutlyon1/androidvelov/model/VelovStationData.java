@@ -1,7 +1,7 @@
 package fr.iutlyon1.androidvelov.model;
 
 public class VelovStationData {
-    class Position {
+    public static class Position {
         private double lat;
         private double lng;
 
@@ -42,6 +42,21 @@ public class VelovStationData {
     private int availableBikeStands;
     private int availableBikes;
     private long lastUpdate;
+
+    public VelovStationData(int number, String name, String address, Position position, boolean banking, boolean bonus, String status, String contractName, int bikeStands, int availableBikeStands, int availableBikes, long lastUpdate) {
+        this.number = number;
+        this.name = name;
+        this.address = address;
+        this.position = position;
+        this.banking = banking;
+        this.bonus = bonus;
+        this.status = status;
+        this.contractName = contractName;
+        this.bikeStands = bikeStands;
+        this.availableBikeStands = availableBikeStands;
+        this.availableBikes = availableBikes;
+        this.lastUpdate = lastUpdate;
+    }
 
     public int getNumber() {
         return number;
