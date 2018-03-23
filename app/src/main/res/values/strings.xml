@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">AndroidVelov</string>
     <string name="listItemStatus">Etat :</string>
-    <string name="listItemAddress">Adresse :</string>
     <string name="listItemAvailableBikes">Velo dispo :</string>
     <string name="listItemAvailableBikeStands">Place dispo :</string>
 </resources>

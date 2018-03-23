@@ -1,6 +1,8 @@
 package fr.iutlyon1.androidvelov.model;
 
-public class VelovStationData {
+import java.io.Serializable;
+
+public class VelovStationData implements Serializable{
     public static class Position {
         private double lat;
         private double lng;
