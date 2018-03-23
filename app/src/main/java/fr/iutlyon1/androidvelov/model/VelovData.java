@@ -2,17 +2,19 @@ package fr.iutlyon1.androidvelov.model;
 
 import android.support.annotation.NonNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 public class VelovData implements Iterable {
 
-    private Set<VelovStationData> stations;
+    private List<VelovStationData> stations;
 
     public VelovData() {
-        this.stations = new HashSet<>();
+        this.stations = new ArrayList<>();
     }
 
     public int size() {
@@ -43,6 +45,10 @@ public class VelovData implements Iterable {
         return stations.addAll(c);
     }
 
+    public VelovStationData get(int index) {
+        return stations.get(index);
+    }
+
     public boolean removeAll(@NonNull Collection<?> c) {
         return stations.removeAll(c);
     }
@@ -52,4 +58,5 @@ public class VelovData implements Iterable {
     public Iterator iterator() {
         return stations.iterator();
     }
+
 }
