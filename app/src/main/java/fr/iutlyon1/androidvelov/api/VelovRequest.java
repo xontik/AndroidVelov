@@ -12,10 +12,13 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import fr.iutlyon1.androidvelov.StationListAdapter;
 import fr.iutlyon1.androidvelov.model.VelovData;
 
-public class VelovRequest extends AsyncTask<Object, Void, VelovData> {
+public class VelovRequest extends AsyncTask<StationListAdapter, Void, VelovData> {
     private static final String API_URL = "https://api.jcdecaux.com/vls/v1/stations";
+
+    private StationListAdapter adapter;
 
     private final String contract;
     private final String apiKey;
@@ -26,7 +29,9 @@ public class VelovRequest extends AsyncTask<Object, Void, VelovData> {
     }
 
     @Override
-    protected VelovData doInBackground(Object... objects) {
+    protected VelovData doInBackground(StationListAdapter... adapters) {
+        this.adapter = adapters[0];
+
         URL url;
         HttpsURLConnection urlConnection = null;
 
@@ -61,7 +66,11 @@ public class VelovRequest extends AsyncTask<Object, Void, VelovData> {
 
     @Override
     protected void onPostExecute(VelovData velovData) {
+        if (velovData == null) {
+            return;
+        }
 
+        this.adapter.setItems(velovData);
     }
 
     private URL buildURL(String url, String... parameters) {

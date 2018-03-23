@@ -65,8 +65,6 @@ public class VelovStationData implements Serializable{
         this.lastUpdate = new Date(lastUpdate);
     }
 
-  
-
     public int getNumber() {
         return number;
     }

@@ -10,10 +10,6 @@ import android.widget.TextView;
 import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
 
-/**
- * Created by xontik on 23/03/2018.
- */
-
 public class StationListAdapter extends BaseAdapter {
 
     private VelovData items;
@@ -32,6 +28,11 @@ public class StationListAdapter extends BaseAdapter {
     @Override
     public Object getItem(int position) {
         return items.get(position);
+    }
+
+    public void setItems(VelovData items) {
+        this.items = items;
+        notifyDataSetChanged();
     }
 
     @Override
