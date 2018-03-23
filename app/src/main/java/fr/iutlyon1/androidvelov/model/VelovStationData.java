@@ -160,11 +160,11 @@ public class VelovStationData {
         this.availableBikes = availableBikes;
     }
 
-    public long getLastUpdate() {
+    public Date getLastUpdate() {
         return lastUpdate;
     }
 
-    public void setLastUpdate(long lastUpdate) {
+    public void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 }
