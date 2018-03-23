@@ -5,7 +5,7 @@ import java.util.Date;
 import java.io.Serializable;
 
 public class VelovStationData implements Serializable{
-    public static class Position {
+    public static class Position implements  Serializable {
         private double lat;
         private double lng;
 
@@ -65,7 +65,7 @@ public class VelovStationData implements Serializable{
         this.lastUpdate = new Date(lastUpdate);
     }
 
-  
+
 
     public int getNumber() {
         return number;

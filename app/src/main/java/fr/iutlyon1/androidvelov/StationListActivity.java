@@ -78,7 +78,7 @@ public class StationListActivity extends AppCompatActivity {
 
 
         stationListView.setOnItemClickListener((parent, view, position, id) -> {
-            Intent intent = new Intent();
+            Intent intent = new Intent(StationListActivity.this, StationDetailActivity.class);
             intent.putExtra("station", (VelovStationData) adapter.getItem(position));
             startActivity(intent);
         });
