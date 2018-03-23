@@ -52,8 +52,6 @@ public class StationListAdapter extends BaseAdapter {
                 view.findViewById(R.id.stationName);
         TextView stationStatus = (TextView)
                 view.findViewById(R.id.stationStatus);
-        TextView stationAddress = (TextView)
-                view.findViewById(R.id.stationAddress);
         TextView stationAvailableBike = (TextView)
                 view.findViewById(R.id.stationAvailableBikes);
         TextView stationAvailableBikeStands = (TextView)
@@ -61,7 +59,6 @@ public class StationListAdapter extends BaseAdapter {
 
         stationName.setText(currentItem.getName());
         stationStatus.setText(String.format("%s%s", context.getString(R.string.listItemStatus), currentItem.getStatus()));
-        stationAddress.setText(String.format("%s%s", context.getString(R.string.listItemAddress), currentItem.getAddress()));
         stationAvailableBike.setText(String.format("%s%s", context.getString(R.string.listItemAvailableBikes), String.valueOf(currentItem.getAvailableBikes())));
         stationAvailableBikeStands.setText(String.format("%s%s", context.getString(R.string.listItemAvailableBikeStands), String.valueOf(currentItem.getAvailableBikeStands())));
 

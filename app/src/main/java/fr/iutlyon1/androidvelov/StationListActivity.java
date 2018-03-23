@@ -1,8 +1,11 @@
 package fr.iutlyon1.androidvelov;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.io.File;
@@ -72,5 +75,13 @@ public class StationListActivity extends AppCompatActivity {
         StationListAdapter adapter = new StationListAdapter (this.getBaseContext(), items);
 
         stationListView.setAdapter(adapter);
+
+
+        stationListView.setOnItemClickListener((parent, view, position, id) -> {
+            Intent intent = new Intent();
+            intent.putExtra("station", (VelovStationData) adapter.getItem(position));
+            startActivity(intent);
+        });
+
     }
 }
