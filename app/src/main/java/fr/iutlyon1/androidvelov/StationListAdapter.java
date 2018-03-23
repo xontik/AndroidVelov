@@ -60,10 +60,10 @@ public class StationListAdapter extends BaseAdapter {
                 view.findViewById(R.id.stationAvailableBikeStands);
 
         stationName.setText(currentItem.getName());
-        stationStatus.setText(currentItem.getStatus());
-        stationAddress.setText(currentItem.getAddress());
-        stationAvailableBike.setText(String.valueOf(currentItem.getAvailableBikes()));
-        stationAvailableBikeStands.setText(String.valueOf(currentItem.getAvailableBikeStands()));
+        stationStatus.setText(String.format("%s%s", context.getString(R.string.listItemStatus), currentItem.getStatus()));
+        stationAddress.setText(String.format("%s%s", context.getString(R.string.listItemAddress), currentItem.getAddress()));
+        stationAvailableBike.setText(String.format("%s%s", context.getString(R.string.listItemAvailableBikes), String.valueOf(currentItem.getAvailableBikes())));
+        stationAvailableBikeStands.setText(String.format("%s%s", context.getString(R.string.listItemAvailableBikeStands), String.valueOf(currentItem.getAvailableBikeStands())));
 
         return view;
     }

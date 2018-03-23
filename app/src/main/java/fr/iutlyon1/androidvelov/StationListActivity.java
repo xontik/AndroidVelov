@@ -40,6 +40,34 @@ public class StationListActivity extends AppCompatActivity {
                 15,
                 0 )
         );
+        items.add(new VelovStationData(
+                1,
+                "Station name",
+                "18 rue léon Fabre",
+                new VelovStationData.Position(10,10),
+                true,
+                false,
+                "OPEN",
+                "Lyon",
+                20,
+                5,
+                15,
+                0 )
+        );
+        items.add(new VelovStationData(
+                1,
+                "Station name",
+                "18 rue léon Fabre",
+                new VelovStationData.Position(10,10),
+                true,
+                false,
+                "OPEN",
+                "Lyon",
+                20,
+                5,
+                15,
+                0 )
+        );
 
         StationListAdapter adapter = new StationListAdapter (this.getBaseContext(), items);
 
