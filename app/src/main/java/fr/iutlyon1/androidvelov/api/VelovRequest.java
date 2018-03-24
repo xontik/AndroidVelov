@@ -5,11 +5,7 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONException;
 
@@ -22,7 +18,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import fr.iutlyon1.androidvelov.StationListAdapter;
 import fr.iutlyon1.androidvelov.model.VelovData;
-import fr.iutlyon1.androidvelov.model.VelovStationData;
+import fr.iutlyon1.androidvelov.utils.MapUtils;
 
 public class VelovRequest extends AsyncTask<Object, Void, VelovData> {
     private static final String API_URL = "https://api.jcdecaux.com/vls/v1/stations";
@@ -80,7 +76,9 @@ public class VelovRequest extends AsyncTask<Object, Void, VelovData> {
         }
 
         for (Object o : update) {
-            if (o instanceof StationListAdapter) {
+            if (o instanceof VelovData) {
+                updateVelovData((VelovData) o, velovData);
+            } else if (o instanceof StationListAdapter) {
                 updateStationListAdapter((StationListAdapter) o, velovData);
             } else if (o instanceof GoogleMap) {
                 updateGoogleMap((GoogleMap) o, velovData);
@@ -90,28 +88,16 @@ public class VelovRequest extends AsyncTask<Object, Void, VelovData> {
         }
     }
 
+    private void updateVelovData(VelovData old, VelovData nu) {
+        old.setAll(nu.getStations());
+    }
+
     private void updateStationListAdapter(StationListAdapter adapter, VelovData data) {
         adapter.setItems(data);
     }
 
     private void updateGoogleMap(GoogleMap map, VelovData data) {
-        for (VelovStationData station : data) {
-            MarkerOptions marker = new MarkerOptions()
-                    .position(station.getPosition())
-                    .title(station.getName());
-
-            // Si aucun stand de vélo n'est disponible, on change la couleur
-            if (station.getAvailableBikeStands() == 0) {
-                marker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
-            }
-
-            map.addMarker(marker)
-                .setTag(station.getNumber());
-        }
-
-        LatLng lyon = new LatLng(45.756633, 4.838630);
-        map.moveCamera(CameraUpdateFactory.newLatLng(lyon));
-        map.moveCamera(CameraUpdateFactory.zoomTo(12));
+        MapUtils.setMarkers(map, data.getStations());
     }
 
     private void updateAutocompleteTextView(AutoCompleteTextView view, VelovData data) {

@@ -39,19 +39,10 @@ public class VelovStationData implements Serializable{
     }
 
     public boolean matches(String searchString) {
-        String name = this.name.toUpperCase();
+        final String fullname = this.getFullName().toUpperCase();
         searchString = searchString.toUpperCase();
 
-        if (name.contains(searchString)) {
-            return true;
-        }
-
-        try {
-            int searchNumber = Integer.parseInt(searchString);
-            return searchNumber == this.number;
-        } catch (NumberFormatException e) {
-            return false;
-        }
+        return fullname.contains(searchString);
     }
     
     public int getNumber() {

@@ -21,6 +21,10 @@ public class VelovData implements Iterable<VelovStationData> {
         return stations.get(index);
     }
 
+    public List<VelovStationData> getStations() {
+        return stations;
+    }
+
     public VelovStationData find(int number) {
         for (VelovStationData station : stations) {
             if (station.getNumber() == number) {
@@ -90,6 +94,11 @@ public class VelovData implements Iterable<VelovStationData> {
 
     public boolean addAll(@NonNull Collection<? extends VelovStationData> c) {
         return stations.addAll(c);
+    }
+
+    public void setAll(@NonNull Collection<? extends VelovStationData> c) {
+        this.stations.clear();
+        this.stations.addAll(c);
     }
 
     public boolean remove(VelovStationData station) {
