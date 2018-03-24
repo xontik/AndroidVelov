@@ -3,4 +3,5 @@
     <dimen name="edittext_height">42dp</dimen>
     <dimen name="edittext_paddingX">12dp</dimen>
     <dimen name="edittext_paddingY">3dp</dimen>
+    <dimen name="icon_edittext_padding_end">42dp</dimen>
 </resources>

@@ -3,7 +3,10 @@ package fr.iutlyon1.androidvelov;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
+import android.util.Log;
+import android.view.View;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -16,11 +19,13 @@ import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
 import fr.iutlyon1.androidvelov.utils.MapUtils;
 import fr.iutlyon1.androidvelov.utils.TextWatcherAdapter;
+import fr.iutlyon1.androidvelov.utils.ViewUtils;
 
 public class StationMapActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap map = null;
     private AutoCompleteTextView search;
+    private ImageButton searchEmpty;
 
     private VelovData velovData;
 
@@ -38,6 +43,7 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
         mapFragment.getMapAsync(this);
 
         search = findViewById(R.id.search);
+        searchEmpty = findViewById(R.id.search_empty);
 
         search.setOnFocusChangeListener((view, hasFocus) -> {
             if (map == null) {
@@ -53,9 +59,15 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
             public void afterTextChanged(Editable s) {
                 String searchString = s.toString();
 
+                ViewUtils.animateVisibility(searchEmpty, !searchString.isEmpty());
+
                 List<VelovStationData> filteredStationList = velovData.find(searchString);
                 MapUtils.setMarkers(map, filteredStationList);
             }
+        });
+
+        searchEmpty.setOnClickListener(view -> {
+            search.setText("");
         });
     }
 
