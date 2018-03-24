@@ -2,6 +2,8 @@ package fr.iutlyon1.androidvelov.model;
 
 import android.support.annotation.NonNull;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -38,6 +40,36 @@ public class VelovData implements Iterable<VelovStationData> {
         }
 
         return stationList;
+    }
+
+    public VelovStationData getNearest(LatLng position) {
+        if (stations.size() == 0) {
+            return null;
+        }
+
+        final Iterator<VelovStationData> it = stations.iterator();
+
+        VelovStationData nearest = it.next();
+        double nearestDistance = computeDistance(position, nearest.getPosition());
+
+        while (it.hasNext()) {
+            VelovStationData station = it.next();
+            double distance = computeDistance(position, station.getPosition());
+
+            if (distance < nearestDistance) {
+                nearest = station;
+                nearestDistance = distance;
+            }
+        }
+
+        return nearest;
+    }
+
+    private double computeDistance(LatLng from, LatLng to) {
+        double lat= to.latitude - from.latitude;
+        double lng = to.longitude - from.longitude;
+
+        return Math.sqrt(Math.pow(lat, 2) + Math.pow(lng, 2));
     }
 
     public int size() {

@@ -3,5 +3,7 @@
     <string name="listItemStatus">Etat :</string>
     <string name="listItemAvailableBikes">Velo dispo :</string>
     <string name="listItemAvailableBikeStands">Place dispo :</string>
+
     <string name="title_activity_station_map">Map</string>
+    <string name="station_map_search_hint">Rechercher une station</string>
 </resources>

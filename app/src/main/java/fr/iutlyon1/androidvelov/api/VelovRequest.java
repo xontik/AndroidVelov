@@ -2,6 +2,8 @@ package fr.iutlyon1.androidvelov.api;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -82,6 +84,8 @@ public class VelovRequest extends AsyncTask<Object, Void, VelovData> {
                 updateStationListAdapter((StationListAdapter) o, velovData);
             } else if (o instanceof GoogleMap) {
                 updateGoogleMap((GoogleMap) o, velovData);
+            } else if (o instanceof AutoCompleteTextView) {
+                updateAutocompleteTextView((AutoCompleteTextView) o, velovData);
             }
         }
     }
@@ -108,6 +112,19 @@ public class VelovRequest extends AsyncTask<Object, Void, VelovData> {
         LatLng lyon = new LatLng(45.756633, 4.838630);
         map.moveCamera(CameraUpdateFactory.newLatLng(lyon));
         map.moveCamera(CameraUpdateFactory.zoomTo(12));
+    }
+
+    private void updateAutocompleteTextView(AutoCompleteTextView view, VelovData data) {
+        String[] names = new String[data.size()];
+        for (int i = 0, length = data.size(); i < length; i++) {
+            names[i] = data.get(i).getFullName();
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                view.getContext(),
+                android.R.layout.simple_list_item_1,
+                names);
+        view.setAdapter(adapter);
     }
 
     private URL buildURL(String url, String... parameters) {

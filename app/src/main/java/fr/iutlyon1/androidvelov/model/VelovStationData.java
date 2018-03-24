@@ -66,6 +66,10 @@ public class VelovStationData implements Serializable{
         return name;
     }
 
+    public String getFullName() {
+        return number + " - " + name;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
