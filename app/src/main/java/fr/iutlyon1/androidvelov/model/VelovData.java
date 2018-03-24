@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public class VelovData implements Iterable {
+public class VelovData implements Iterable<VelovStationData> {
 
     private List<VelovStationData> stations;
 
@@ -23,19 +23,19 @@ public class VelovData implements Iterable {
         return stations.isEmpty();
     }
 
-    public boolean contains(Object o) {
-        return stations.contains(o);
+    public boolean contains(VelovStationData station) {
+        return stations.contains(station);
     }
 
     public boolean add(VelovStationData velovStationData) {
         return stations.add(velovStationData);
     }
 
-    public boolean remove(Object o) {
-        return stations.remove(o);
+    public boolean remove(VelovStationData station) {
+        return stations.remove(station);
     }
 
-    public boolean containsAll(@NonNull Collection<?> c) {
+    public boolean containsAll(@NonNull Collection<? extends VelovStationData> c) {
         return stations.containsAll(c);
     }
 
@@ -47,13 +47,13 @@ public class VelovData implements Iterable {
         return stations.get(index);
     }
 
-    public boolean removeAll(@NonNull Collection<?> c) {
+    public boolean removeAll(@NonNull Collection<? extends VelovStationData> c) {
         return stations.removeAll(c);
     }
 
     @NonNull
     @Override
-    public Iterator iterator() {
+    public Iterator<VelovStationData> iterator() {
         return stations.iterator();
     }
 

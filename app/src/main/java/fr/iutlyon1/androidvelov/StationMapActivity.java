@@ -10,6 +10,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import fr.iutlyon1.androidvelov.api.VelovRequest;
+
 public class StationMapActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap map;
@@ -36,11 +38,8 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
      */
     @Override
     public void onMapReady(GoogleMap map) {
-
-        // Add a marker in Sydney and move the camera
-        LatLng lyon = new LatLng(45.7580539, 4.7650806);
-        map.addMarker(new MarkerOptions().position(lyon).title("Marker in Lyon"));
-        map.moveCamera(CameraUpdateFactory.newLatLng(lyon));
-        map.moveCamera(CameraUpdateFactory.zoomTo(10));
+        final String apiKey = Props.getInstance(getApplicationContext()).get("API_KEY");
+        final VelovRequest request = new VelovRequest("Lyon", apiKey);
+        request.execute(map);
     }
 }

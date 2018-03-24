@@ -2,6 +2,8 @@ package fr.iutlyon1.androidvelov.api;
 
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,7 +16,7 @@ import java.io.Reader;
 import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
 
-public class VelovParser {
+class VelovParser {
 
     private Reader in;
 
@@ -34,7 +36,7 @@ public class VelovParser {
         return builder.toString();
     }
 
-    public VelovData parse() throws IOException, JSONException {
+    VelovData parse() throws IOException, JSONException {
         final String documentString = read();
 
         final JSONArray document = new JSONArray(documentString);
@@ -51,8 +53,15 @@ public class VelovParser {
     private VelovStationData parseStation(JSONObject object) {
         int number = object.optInt("number", -1);
         String name = object.optString("name");
+
+        try {
+            name = name.split("-", 2)[1].trim();
+        } catch (IndexOutOfBoundsException e) {
+            Log.e("ParseVelov", "parseStation: name=" + name, e);
+        }
+
         String address = object.optString("address");
-        VelovStationData.Position position = parsePosition(object.optJSONObject("position"));
+        LatLng position = parseLatLng(object.optJSONObject("position"));
         boolean banking = object.optBoolean("banking");
         boolean bonus = object.optBoolean("bonus");
         String status = object.optString("status");
@@ -67,10 +76,10 @@ public class VelovParser {
                 availableBikeStands, availableBikes, lastUpdate);
     }
 
-    private VelovStationData.Position parsePosition(JSONObject json) {
+    private LatLng parseLatLng(JSONObject json) {
         double lat = json.optDouble("lat");
-        double lng = json.optLong("lng");
+        double lng = json.optDouble("lng");
 
-        return new VelovStationData.Position(lat, lng);
+        return new LatLng(lat, lng);
     }
 }

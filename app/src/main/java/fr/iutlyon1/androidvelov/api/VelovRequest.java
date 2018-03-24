@@ -3,6 +3,11 @@ package fr.iutlyon1.androidvelov.api;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -14,11 +19,12 @@ import javax.net.ssl.HttpsURLConnection;
 
 import fr.iutlyon1.androidvelov.StationListAdapter;
 import fr.iutlyon1.androidvelov.model.VelovData;
+import fr.iutlyon1.androidvelov.model.VelovStationData;
 
-public class VelovRequest extends AsyncTask<StationListAdapter, Void, VelovData> {
+public class VelovRequest extends AsyncTask<Object, Void, VelovData> {
     private static final String API_URL = "https://api.jcdecaux.com/vls/v1/stations";
 
-    private StationListAdapter adapter;
+    private Object[] update;
 
     private final String contract;
     private final String apiKey;
@@ -29,8 +35,8 @@ public class VelovRequest extends AsyncTask<StationListAdapter, Void, VelovData>
     }
 
     @Override
-    protected VelovData doInBackground(StationListAdapter... adapters) {
-        this.adapter = adapters[0];
+    protected VelovData doInBackground(Object... objects) {
+        this.update = objects;
 
         URL url;
         HttpsURLConnection urlConnection = null;
@@ -70,7 +76,30 @@ public class VelovRequest extends AsyncTask<StationListAdapter, Void, VelovData>
             return;
         }
 
-        this.adapter.setItems(velovData);
+        for (Object o : update) {
+            if (o instanceof StationListAdapter) {
+                updateStationListAdapter((StationListAdapter) o, velovData);
+            } else if (o instanceof GoogleMap) {
+                updateGoogleMap((GoogleMap) o, velovData);
+            }
+        }
+    }
+
+    private void updateStationListAdapter(StationListAdapter adapter, VelovData data) {
+        adapter.setItems(data);
+    }
+
+    private void updateGoogleMap(GoogleMap map, VelovData data) {
+        for (VelovStationData station : data) {
+            MarkerOptions marker = new MarkerOptions()
+                    .position(station.getPosition())
+                    .title(station.getName());
+            map.addMarker(marker);
+        }
+
+        LatLng lyon = new LatLng(45.756633, 4.838630);
+        map.moveCamera(CameraUpdateFactory.newLatLng(lyon));
+        map.moveCamera(CameraUpdateFactory.zoomTo(12));
     }
 
     private URL buildURL(String url, String... parameters) {

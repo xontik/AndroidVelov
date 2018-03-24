@@ -1,15 +1,10 @@
 package fr.iutlyon1.androidvelov;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.webkit.WebView;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 import fr.iutlyon1.androidvelov.model.VelovStationData;
 
@@ -39,11 +34,12 @@ public class StationDetailActivity extends AppCompatActivity {
                         "            <li><strong>Emplacements disponibles : </strong>%s</li>\n" +
                         "        </ul>\n" +
                         "    </body>\n" +
-                        "</html>", d.getName(),
+                        "</html>",
+                d.getName(),
                 d.getNumber(),
                 d.getAddress(),
-                d.getPosition().getLat(),
-                d.getPosition().getLng(),
+                d.getPosition().latitude,
+                d.getPosition().longitude,
                 d.isBanking(),
                 d.isBonus(),
                 d.getStatus(),

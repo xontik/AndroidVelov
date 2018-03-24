@@ -1,43 +1,16 @@
 package fr.iutlyon1.androidvelov.model;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.Date;
 
 import java.io.Serializable;
 
 public class VelovStationData implements Serializable{
-    public static class Position implements  Serializable {
-        private double lat;
-        private double lng;
-
-        public Position() {
-        }
-
-        public Position(double lat, double lng) {
-            this.lat = lat;
-            this.lng = lng;
-        }
-
-        public double getLat() {
-            return lat;
-        }
-
-        public void setLat(double lat) {
-            this.lat = lat;
-        }
-
-        public double getLng() {
-            return lng;
-        }
-
-        public void setLng(double lng) {
-            this.lng = lng;
-        }
-    }
-
     private int number;
     private String name;
     private String address;
-    private Position position;
+    private LatLng position;
     private boolean banking;
     private boolean bonus;
     private String status;
@@ -47,7 +20,7 @@ public class VelovStationData implements Serializable{
     private int availableBikes;
     private Date lastUpdate;
 
-    public VelovStationData(int number, String name, String address, Position position,
+    public VelovStationData(int number, String name, String address, LatLng position,
                             boolean banking, boolean bonus, String status, String contractName,
                             int bikeStands, int availableBikeStands, int availableBikes,
                             long lastUpdate) {
@@ -89,21 +62,16 @@ public class VelovStationData implements Serializable{
         this.address = address;
     }
 
-    public Position getPosition() {
+    public LatLng getPosition() {
         return position;
     }
 
-    public void setPosition(Position position) {
+    public void setPosition(LatLng position) {
         this.position = position;
     }
 
     public void setPosition(double lat, double lng) {
-        if (this.position == null) {
-            this.position = new Position();
-        }
-
-        this.position.setLat(lat);
-        this.position.setLng(lng);
+        this.position = new LatLng(lat, lng);
     }
 
     public boolean isBanking() {
