@@ -15,6 +15,31 @@ public class VelovData implements Iterable<VelovStationData> {
         this.stations = new ArrayList<>();
     }
 
+    public VelovStationData get(int index) {
+        return stations.get(index);
+    }
+
+    public VelovStationData find(int number) {
+        for (VelovStationData station : stations) {
+            if (station.getNumber() == number) {
+                return station;
+            }
+        }
+        return null;
+    }
+
+    public List<VelovStationData> find(String searchString) {
+        List<VelovStationData> stationList = new ArrayList<>();
+
+        for (VelovStationData station : stations) {
+            if (station.matches(searchString)) {
+                stationList.add(station);
+            }
+        }
+
+        return stationList;
+    }
+
     public int size() {
         return stations.size();
     }
@@ -31,20 +56,12 @@ public class VelovData implements Iterable<VelovStationData> {
         return stations.add(velovStationData);
     }
 
-    public boolean remove(VelovStationData station) {
-        return stations.remove(station);
-    }
-
-    public boolean containsAll(@NonNull Collection<? extends VelovStationData> c) {
-        return stations.containsAll(c);
-    }
-
     public boolean addAll(@NonNull Collection<? extends VelovStationData> c) {
         return stations.addAll(c);
     }
 
-    public VelovStationData get(int index) {
-        return stations.get(index);
+    public boolean remove(VelovStationData station) {
+        return stations.remove(station);
     }
 
     public boolean removeAll(@NonNull Collection<? extends VelovStationData> c) {

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -94,7 +95,14 @@ public class VelovRequest extends AsyncTask<Object, Void, VelovData> {
             MarkerOptions marker = new MarkerOptions()
                     .position(station.getPosition())
                     .title(station.getName());
-            map.addMarker(marker);
+
+            // Si aucun stand de vélo n'est disponible, on change la couleur
+            if (station.getAvailableBikeStands() == 0) {
+                marker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+            }
+
+            map.addMarker(marker)
+                .setTag(station.getNumber());
         }
 
         LatLng lyon = new LatLng(45.756633, 4.838630);

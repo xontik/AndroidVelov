@@ -37,6 +37,22 @@ public class VelovStationData implements Serializable{
         this.availableBikes = availableBikes;
         this.lastUpdate = new Date(lastUpdate);
     }
+
+    public boolean matches(String searchString) {
+        String name = this.name.toUpperCase();
+        searchString = searchString.toUpperCase();
+
+        if (name.contains(searchString)) {
+            return true;
+        }
+
+        try {
+            int searchNumber = Integer.parseInt(searchString);
+            return searchNumber == this.number;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
     
     public int getNumber() {
         return number;
