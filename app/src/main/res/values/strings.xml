@@ -6,4 +6,12 @@
 
     <string name="title_activity_station_map">Map</string>
     <string name="station_map_search_hint">Rechercher une station</string>
+
+    <string name="dialog_noConnection_title">Vous n\'êtes pas connecté à Internet</string>
+    <string name="dialog_noConnection_content">Impossible de charger les informations sur les stations</string>
+
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Annuler</string>
+    <string name="dialog_yes">Oui</string>
+    <string name="dialog_no">Non</string>
 </resources>

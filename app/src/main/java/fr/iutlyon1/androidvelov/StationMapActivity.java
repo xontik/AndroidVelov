@@ -94,7 +94,7 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
 
         final String apiKey = Props.getInstance(getApplicationContext()).get("API_KEY");
         final VelovRequest request = new VelovRequest("Lyon", apiKey);
-        request.execute(velovData);
+        request.execute(this, velovData);
     }
 
     private void initClusterManager() {

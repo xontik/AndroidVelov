@@ -1,5 +1,7 @@
 package fr.iutlyon1.androidvelov.api;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -7,17 +9,22 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import fr.iutlyon1.androidvelov.R;
 import fr.iutlyon1.androidvelov.model.VelovData;
 
-public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
+public class VelovRequest extends AsyncTask<Object, Void, VelovData> {
     private static final String API_URL = "https://api.jcdecaux.com/vls/v1/stations";
 
-    private VelovData[] velovDatas;
+    private Context context = null;
+    private VelovData velovData = null;
 
     private final String contract;
     private final String apiKey;
@@ -28,8 +35,13 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
     }
 
     @Override
-    protected VelovData doInBackground(VelovData... datas) {
-        this.velovDatas = datas;
+    protected VelovData doInBackground(Object... objects) {
+        this.context = (Context) objects[0];
+        this.velovData = (VelovData) objects[1];
+
+        if (!isOnline()) {
+            return null;
+        }
 
         URL url;
         HttpsURLConnection urlConnection = null;
@@ -64,14 +76,37 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
     }
 
     @Override
-    protected void onPostExecute(VelovData velovData) {
-        if (velovData == null) {
+    protected void onPostExecute(VelovData data) {
+        if (data == null) {
+            printErrorMessage();
             return;
         }
 
-        for (VelovData data : this.velovDatas) {
-            data.setAll(velovData.getStations());
+        this.velovData.setAll(data.getStations());
+    }
+
+    private boolean isOnline() {
+        try {
+            int timeout = 2000;
+            Socket sock  = new Socket();
+            SocketAddress addr = new InetSocketAddress("8.8.8.8", 53);
+
+            sock.connect(addr, timeout);
+            sock.close();
+
+            return true;
+        } catch (IOException e) {
+            return false;
         }
+    }
+
+    private void printErrorMessage() {
+        AlertDialog.Builder adb = new AlertDialog.Builder(context);
+        adb.setTitle(R.string.dialog_noConnection_title);
+        adb.setMessage(R.string.dialog_noConnection_content);
+        adb.setNeutralButton(R.string.dialog_ok, null);
+
+        adb.show();
     }
 
     private URL buildURL(String url, String... parameters) {
