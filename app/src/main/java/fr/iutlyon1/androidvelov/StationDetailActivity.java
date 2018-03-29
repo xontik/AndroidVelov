@@ -11,6 +11,7 @@ import fr.iutlyon1.androidvelov.model.VelovStationData;
 public class StationDetailActivity extends AppCompatActivity {
 
     private WebView webView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

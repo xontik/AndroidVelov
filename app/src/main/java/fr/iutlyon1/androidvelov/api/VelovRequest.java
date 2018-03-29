@@ -2,10 +2,6 @@ package fr.iutlyon1.androidvelov.api;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-
-import com.google.android.gms.maps.GoogleMap;
 
 import org.json.JSONException;
 
@@ -16,14 +12,12 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import fr.iutlyon1.androidvelov.StationListAdapter;
 import fr.iutlyon1.androidvelov.model.VelovData;
-import fr.iutlyon1.androidvelov.utils.MapUtils;
 
-public class VelovRequest extends AsyncTask<Object, Void, VelovData> {
+public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
     private static final String API_URL = "https://api.jcdecaux.com/vls/v1/stations";
 
-    private Object[] update;
+    private VelovData[] velovDatas;
 
     private final String contract;
     private final String apiKey;
@@ -34,8 +28,8 @@ public class VelovRequest extends AsyncTask<Object, Void, VelovData> {
     }
 
     @Override
-    protected VelovData doInBackground(Object... objects) {
-        this.update = objects;
+    protected VelovData doInBackground(VelovData... datas) {
+        this.velovDatas = datas;
 
         URL url;
         HttpsURLConnection urlConnection = null;
@@ -75,42 +69,9 @@ public class VelovRequest extends AsyncTask<Object, Void, VelovData> {
             return;
         }
 
-        for (Object o : update) {
-            if (o instanceof VelovData) {
-                updateVelovData((VelovData) o, velovData);
-            } else if (o instanceof StationListAdapter) {
-                updateStationListAdapter((StationListAdapter) o, velovData);
-            } else if (o instanceof GoogleMap) {
-                updateGoogleMap((GoogleMap) o, velovData);
-            } else if (o instanceof AutoCompleteTextView) {
-                updateAutocompleteTextView((AutoCompleteTextView) o, velovData);
-            }
+        for (VelovData data : this.velovDatas) {
+            data.setAll(velovData.getStations());
         }
-    }
-
-    private void updateVelovData(VelovData old, VelovData nu) {
-        old.setAll(nu.getStations());
-    }
-
-    private void updateStationListAdapter(StationListAdapter adapter, VelovData data) {
-        adapter.setItems(data);
-    }
-
-    private void updateGoogleMap(GoogleMap map, VelovData data) {
-        MapUtils.setMarkers(map, data.getStations());
-    }
-
-    private void updateAutocompleteTextView(AutoCompleteTextView view, VelovData data) {
-        String[] names = new String[data.size()];
-        for (int i = 0, length = data.size(); i < length; i++) {
-            names[i] = data.get(i).getFullName();
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                view.getContext(),
-                android.R.layout.simple_list_item_1,
-                names);
-        view.setAdapter(adapter);
     }
 
     private URL buildURL(String url, String... parameters) {

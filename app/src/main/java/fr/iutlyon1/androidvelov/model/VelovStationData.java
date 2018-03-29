@@ -1,12 +1,12 @@
 package fr.iutlyon1.androidvelov.model;
 
 import com.google.android.gms.maps.model.LatLng;
-
-import java.util.Date;
+import com.google.maps.android.clustering.ClusterItem;
 
 import java.io.Serializable;
+import java.util.Date;
 
-public class VelovStationData implements Serializable{
+public class VelovStationData implements Serializable, ClusterItem {
     private int number;
     private String name;
     private String address;
@@ -44,7 +44,7 @@ public class VelovStationData implements Serializable{
 
         return fullname.contains(searchString);
     }
-    
+
     public int getNumber() {
         return number;
     }
@@ -73,6 +73,7 @@ public class VelovStationData implements Serializable{
         this.address = address;
     }
 
+    @Override
     public LatLng getPosition() {
         return position;
     }
@@ -147,5 +148,15 @@ public class VelovStationData implements Serializable{
 
     public void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    @Override
+    public String getTitle() {
+        return this.getFullName();
+    }
+
+    @Override
+    public String getSnippet() {
+        return null;
     }
 }

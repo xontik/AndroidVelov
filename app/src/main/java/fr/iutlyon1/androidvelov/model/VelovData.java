@@ -10,11 +10,16 @@ import java.util.Iterator;
 import java.util.List;
 
 public class VelovData implements Iterable<VelovStationData> {
+    public interface ItemUpdateListener {
+        void onItemUpdate(VelovData velovData);
+    }
 
-    private List<VelovStationData> stations;
+    private List<VelovStationData> stations = null;
+    private List<ItemUpdateListener> itemUpdateListeners = null;
 
     public VelovData() {
         this.stations = new ArrayList<>();
+        this.itemUpdateListeners = new ArrayList<>();
     }
 
     public VelovStationData get(int index) {
@@ -23,15 +28,6 @@ public class VelovData implements Iterable<VelovStationData> {
 
     public List<VelovStationData> getStations() {
         return stations;
-    }
-
-    public VelovStationData find(int number) {
-        for (VelovStationData station : stations) {
-            if (station.getNumber() == number) {
-                return station;
-            }
-        }
-        return null;
     }
 
     public List<VelovStationData> find(String searchString) {
@@ -47,7 +43,7 @@ public class VelovData implements Iterable<VelovStationData> {
     }
 
     public VelovStationData getNearest(LatLng position) {
-        if (stations.size() == 0) {
+        if (isEmpty()) {
             return null;
         }
 
@@ -76,6 +72,20 @@ public class VelovData implements Iterable<VelovStationData> {
         return Math.sqrt(Math.pow(lat, 2) + Math.pow(lng, 2));
     }
 
+    public void addOnItemsUpdateListener(ItemUpdateListener listener) {
+        this.itemUpdateListeners.add(listener);
+    }
+
+    public void removeOnItemsUpdateListener(ItemUpdateListener listener) {
+        this.itemUpdateListeners.remove(listener);
+    }
+
+    private void notifyItemsUpdated() {
+        for (ItemUpdateListener listener : itemUpdateListeners) {
+            listener.onItemUpdate(this);
+        }
+    }
+
     public int size() {
         return stations.size();
     }
@@ -89,24 +99,41 @@ public class VelovData implements Iterable<VelovStationData> {
     }
 
     public boolean add(VelovStationData velovStationData) {
-        return stations.add(velovStationData);
+        boolean wasAdded = stations.add(velovStationData);
+        if (wasAdded) {
+            notifyItemsUpdated();
+        }
+        return wasAdded;
     }
 
     public boolean addAll(@NonNull Collection<? extends VelovStationData> c) {
-        return stations.addAll(c);
+        boolean wasAdded = stations.addAll(c);
+        if (wasAdded) {
+            notifyItemsUpdated();
+        }
+        return wasAdded;
     }
 
     public void setAll(@NonNull Collection<? extends VelovStationData> c) {
         this.stations.clear();
         this.stations.addAll(c);
+        notifyItemsUpdated();
     }
 
     public boolean remove(VelovStationData station) {
-        return stations.remove(station);
+        boolean wasRemoved = stations.remove(station);
+        if (wasRemoved) {
+            notifyItemsUpdated();
+        }
+        return wasRemoved;
     }
 
     public boolean removeAll(@NonNull Collection<? extends VelovStationData> c) {
-        return stations.removeAll(c);
+        boolean wasRemoved = stations.removeAll(c);
+        if (wasRemoved) {
+            notifyItemsUpdated();
+        }
+        return wasRemoved;
     }
 
     @NonNull
