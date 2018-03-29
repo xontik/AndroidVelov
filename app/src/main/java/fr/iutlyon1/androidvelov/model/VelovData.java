@@ -4,18 +4,20 @@ import android.support.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public class VelovData implements Iterable<VelovStationData> {
+public class VelovData implements Iterable<VelovStationData>, Serializable {
     public interface ItemUpdateListener {
         void onItemUpdate(VelovData velovData);
     }
 
     private List<VelovStationData> stations = null;
-    private List<ItemUpdateListener> itemUpdateListeners = null;
+
+    private transient List<ItemUpdateListener> itemUpdateListeners = null;
 
     public VelovData() {
         this.stations = new ArrayList<>();
@@ -142,4 +144,10 @@ public class VelovData implements Iterable<VelovStationData> {
         return stations.iterator();
     }
 
+    @Override
+    public String toString() {
+        return "VelovData{" +
+                "stations=" + stations +
+                '}';
+    }
 }

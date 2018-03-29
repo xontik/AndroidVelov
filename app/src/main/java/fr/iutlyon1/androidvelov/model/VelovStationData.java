@@ -3,6 +3,9 @@ package fr.iutlyon1.androidvelov.model;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -43,6 +46,39 @@ public class VelovStationData implements Serializable, ClusterItem {
         searchString = searchString.toUpperCase();
 
         return fullname.contains(searchString);
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.write(number);
+        out.writeObject(name);
+        out.writeObject(address);
+        out.writeDouble(position.latitude);
+        out.writeDouble(position.longitude);
+        out.writeBoolean(banking);
+        out.writeBoolean(bonus);
+        out.writeObject(status);
+        out.writeObject(contractName);
+        out.write(bikeStands);
+        out.write(availableBikeStands);
+        out.write(availableBikes);
+        out.writeObject(lastUpdate);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        this.number = in.read();
+        this.name = (String) in.readObject();
+        this.address = (String) in.readObject();
+        double lat = in.readDouble(),
+            lng = in.readDouble();
+        this.position = new LatLng(lat, lng);
+        this.banking = in.readBoolean();
+        this.bonus = in.readBoolean();
+        this.status = (String) in.readObject();
+        this.contractName = (String) in.readObject();
+        this.bikeStands = in.read();
+        this.availableBikeStands = in.read();
+        this.availableBikes = in.read();
+        this.lastUpdate = (Date) in.readObject();
     }
 
     public int getNumber() {
@@ -158,5 +194,10 @@ public class VelovStationData implements Serializable, ClusterItem {
     @Override
     public String getSnippet() {
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return this.getFullName();
     }
 }

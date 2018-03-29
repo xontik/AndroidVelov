@@ -1,11 +1,14 @@
 package fr.iutlyon1.androidvelov;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -14,18 +17,26 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.clustering.ClusterManager;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 import fr.iutlyon1.androidvelov.api.VelovRequest;
 import fr.iutlyon1.androidvelov.display.VelovClusterRenderer;
 import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
+import fr.iutlyon1.androidvelov.utils.InternetUtils;
 import fr.iutlyon1.androidvelov.utils.LatLngUtils;
 import fr.iutlyon1.androidvelov.utils.MapUtils;
 import fr.iutlyon1.androidvelov.utils.TextWatcherAdapter;
 import fr.iutlyon1.androidvelov.utils.ViewUtils;
 
 public class StationMapActivity extends FragmentActivity implements OnMapReadyCallback {
+    private static final String TAG = "StationMapActivity";
+    private static final String SAVE_FILE = "velocData.ser";
 
     private GoogleMap map = null;
     private ClusterManager<VelovStationData> clusterManager = null;
@@ -87,11 +98,43 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume() called");
+
+        if (map != null) {
+            map.setOnMapLoadedCallback(() -> {
+                Log.d(TAG, "onResume: Map loaded");
+                loadData();
+            });
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        OutputStream out;
+        ObjectOutputStream oos;
+
+        try {
+            out = openFileOutput(SAVE_FILE, Context.MODE_PRIVATE);
+            oos = new ObjectOutputStream(out);
+
+            oos.writeObject(velovData);
+
+            oos.close();
+        } catch (IOException e) {
+            Log.e(TAG, "onStop: " + e.getMessage(), e);
+        }
+
+        super.onStop();
+    }
+
+    @Override
     public void onMapReady(GoogleMap map) {
         this.map = map;
 
         initClusterManager();
-        fetchData();
+        loadData();
     }
 
     private void initClusterManager() {
@@ -103,23 +146,52 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
         map.setOnMarkerClickListener(clusterManager);
     }
 
-    private void fetchData() {
+    private void loadData() {
         final String apiKey = Props.getInstance(getApplicationContext()).get("API_KEY");
 
-        final VelovRequest request = new VelovRequest(this, "Lyon", apiKey);
-        request.execute(velovData);
+        if (!InternetUtils.isNetworkAvailable(this)) {
+            Toast.makeText(this, R.string.toast_loadSavedData , Toast.LENGTH_SHORT)
+                    .show();
+            loadLastSave();
+        } else {
+            final VelovRequest request = new VelovRequest(this, "Lyon", apiKey);
+            request.execute(velovData);
+        }
+    }
+
+    private void loadLastSave() {
+        InputStream in;
+        ObjectInputStream ois;
+        VelovData savedData = null;
+
+        try {
+            in = openFileInput(SAVE_FILE);
+            ois = new ObjectInputStream(in);
+
+            savedData = (VelovData) ois.readObject();
+
+            ois.close();
+        } catch (IOException|ClassNotFoundException e) {
+            Log.e(TAG, "loadLastSave: " + e.getMessage(), e);
+        }
+
+        Log.d(TAG, "loadLastSave: savedData=" + savedData);
+        if (savedData != null) {
+            this.velovData.setAll(savedData.getStations());
+        }
     }
 
     private void updateGoogleMap() {
-        if (clusterManager != null) {
-            List<VelovStationData> stations = velovData.getStations();
+        if (map != null && clusterManager != null && !velovData.isEmpty()) {
+            final List<VelovStationData> stations = velovData.getStations();
 
             clusterManager.clearItems();
             clusterManager.addItems(stations);
 
-            LatLngBounds bounds = LatLngUtils.computeBounds(stations);
-            map.moveCamera(
-                    CameraUpdateFactory.newLatLngBounds(bounds, MapUtils.MAP_PADDING));
+            final LatLngBounds bounds = LatLngUtils.computeBounds(stations);
+
+            map.setOnMapLoadedCallback(() -> map.moveCamera(
+                    CameraUpdateFactory.newLatLngBounds(bounds, MapUtils.MAP_PADDING)));
         }
     }
 
