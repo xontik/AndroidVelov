@@ -44,7 +44,7 @@ public class StationListActivity extends AppCompatActivity {
     private void loadVelovData() {
         final String apiKey = Props.getInstance(getApplicationContext()).get("API_KEY");
 
-        VelovRequest velovRequest = new VelovRequest("Lyon", apiKey);
-        velovRequest.execute(this, velovData);
+        VelovRequest velovRequest = new VelovRequest(this, "Lyon", apiKey);
+        velovRequest.execute(velovData);
     }
 }

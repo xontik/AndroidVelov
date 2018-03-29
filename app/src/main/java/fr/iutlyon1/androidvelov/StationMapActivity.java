@@ -91,10 +91,7 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
         this.map = map;
 
         initClusterManager();
-
-        final String apiKey = Props.getInstance(getApplicationContext()).get("API_KEY");
-        final VelovRequest request = new VelovRequest("Lyon", apiKey);
-        request.execute(this, velovData);
+        fetchData();
     }
 
     private void initClusterManager() {
@@ -104,6 +101,13 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
 
         map.setOnCameraIdleListener(clusterManager);
         map.setOnMarkerClickListener(clusterManager);
+    }
+
+    private void fetchData() {
+        final String apiKey = Props.getInstance(getApplicationContext()).get("API_KEY");
+
+        final VelovRequest request = new VelovRequest(this, "Lyon", apiKey);
+        request.execute(velovData);
     }
 
     private void updateGoogleMap() {
