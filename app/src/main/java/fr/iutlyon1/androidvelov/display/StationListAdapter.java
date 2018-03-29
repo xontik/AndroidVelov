@@ -1,4 +1,4 @@
-package fr.iutlyon1.androidvelov;
+package fr.iutlyon1.androidvelov.display;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import fr.iutlyon1.androidvelov.R;
 import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
 
@@ -49,14 +50,10 @@ public class StationListAdapter extends BaseAdapter {
 
         VelovStationData currentItem = (VelovStationData) getItem(position);
 
-        TextView stationName = (TextView)
-                view.findViewById(R.id.stationName);
-        TextView stationStatus = (TextView)
-                view.findViewById(R.id.stationStatus);
-        TextView stationAvailableBike = (TextView)
-                view.findViewById(R.id.stationAvailableBikes);
-        TextView stationAvailableBikeStands = (TextView)
-                view.findViewById(R.id.stationAvailableBikeStands);
+        TextView stationName = view.findViewById(R.id.stationName);
+        TextView stationStatus = view.findViewById(R.id.stationStatus);
+        TextView stationAvailableBike = view.findViewById(R.id.stationAvailableBikes);
+        TextView stationAvailableBikeStands = view.findViewById(R.id.stationAvailableBikeStands);
 
         stationName.setText(currentItem.getName());
         stationStatus.setText(String.format("%s%s", context.getString(R.string.listItemStatus), currentItem.getStatus()));

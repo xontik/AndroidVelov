@@ -1,36 +1,43 @@
 package fr.iutlyon1.androidvelov.api;
 
+import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.json.JSONException;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import fr.iutlyon1.androidvelov.StationListAdapter;
 import fr.iutlyon1.androidvelov.model.VelovData;
+import fr.iutlyon1.androidvelov.utils.InternetUtils;
 
-public class VelovRequest extends AsyncTask<StationListAdapter, Void, VelovData> {
+public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
     private static final String API_URL = "https://api.jcdecaux.com/vls/v1/stations";
 
-    private StationListAdapter adapter;
-
+    private WeakReference<Context> context = null;
     private final String contract;
     private final String apiKey;
 
-    public VelovRequest(String contract, String apiKey) {
+    private VelovData[] datas = null;
+
+    public VelovRequest(Context context, String contract, String apiKey) {
+        this.context = new WeakReference<>(context);
         this.contract = contract;
         this.apiKey = apiKey;
     }
 
     @Override
-    protected VelovData doInBackground(StationListAdapter... adapters) {
-        this.adapter = adapters[0];
+    protected VelovData doInBackground(VelovData... datas) {
+        this.datas = datas;
+
+        if (!InternetUtils.isOnline()) {
+            return null;
+        }
 
         URL url;
         HttpsURLConnection urlConnection = null;
@@ -42,6 +49,7 @@ public class VelovRequest extends AsyncTask<StationListAdapter, Void, VelovData>
             if (url == null) {
                 return null;
             }
+
             urlConnection = (HttpsURLConnection) url.openConnection();
 
             if (urlConnection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
@@ -58,7 +66,6 @@ public class VelovRequest extends AsyncTask<StationListAdapter, Void, VelovData>
             }
 
             e.printStackTrace();
-            Log.e("VelovRequest", e.getMessage());
         }
 
         return velovData;
@@ -67,10 +74,16 @@ public class VelovRequest extends AsyncTask<StationListAdapter, Void, VelovData>
     @Override
     protected void onPostExecute(VelovData velovData) {
         if (velovData == null) {
+            Context context = this.context.get();
+            if (context != null) {
+                InternetUtils.showConnectionDialog(context);
+            }
             return;
         }
 
-        this.adapter.setItems(velovData);
+        for (VelovData data : this.datas) {
+            data.setAll(velovData.getStations());
+        }
     }
 
     private URL buildURL(String url, String... parameters) {

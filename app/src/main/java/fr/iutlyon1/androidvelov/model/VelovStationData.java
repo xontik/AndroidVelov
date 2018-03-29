@@ -1,43 +1,16 @@
 package fr.iutlyon1.androidvelov.model;
 
-import java.util.Date;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.clustering.ClusterItem;
 
 import java.io.Serializable;
+import java.util.Date;
 
-public class VelovStationData implements Serializable{
-    public static class Position implements  Serializable {
-        private double lat;
-        private double lng;
-
-        public Position() {
-        }
-
-        public Position(double lat, double lng) {
-            this.lat = lat;
-            this.lng = lng;
-        }
-
-        public double getLat() {
-            return lat;
-        }
-
-        public void setLat(double lat) {
-            this.lat = lat;
-        }
-
-        public double getLng() {
-            return lng;
-        }
-
-        public void setLng(double lng) {
-            this.lng = lng;
-        }
-    }
-
+public class VelovStationData implements Serializable, ClusterItem {
     private int number;
     private String name;
     private String address;
-    private Position position;
+    private LatLng position;
     private boolean banking;
     private boolean bonus;
     private String status;
@@ -47,7 +20,7 @@ public class VelovStationData implements Serializable{
     private int availableBikes;
     private Date lastUpdate;
 
-    public VelovStationData(int number, String name, String address, Position position,
+    public VelovStationData(int number, String name, String address, LatLng position,
                             boolean banking, boolean bonus, String status, String contractName,
                             int bikeStands, int availableBikeStands, int availableBikes,
                             long lastUpdate) {
@@ -64,7 +37,14 @@ public class VelovStationData implements Serializable{
         this.availableBikes = availableBikes;
         this.lastUpdate = new Date(lastUpdate);
     }
-    
+
+    public boolean matches(String searchString) {
+        final String fullname = this.getFullName().toUpperCase();
+        searchString = searchString.toUpperCase();
+
+        return fullname.contains(searchString);
+    }
+
     public int getNumber() {
         return number;
     }
@@ -75,6 +55,10 @@ public class VelovStationData implements Serializable{
 
     public String getName() {
         return name;
+    }
+
+    public String getFullName() {
+        return number + " - " + name;
     }
 
     public void setName(String name) {
@@ -89,21 +73,17 @@ public class VelovStationData implements Serializable{
         this.address = address;
     }
 
-    public Position getPosition() {
+    @Override
+    public LatLng getPosition() {
         return position;
     }
 
-    public void setPosition(Position position) {
+    public void setPosition(LatLng position) {
         this.position = position;
     }
 
     public void setPosition(double lat, double lng) {
-        if (this.position == null) {
-            this.position = new Position();
-        }
-
-        this.position.setLat(lat);
-        this.position.setLng(lng);
+        this.position = new LatLng(lat, lng);
     }
 
     public boolean isBanking() {
@@ -168,5 +148,15 @@ public class VelovStationData implements Serializable{
 
     public void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    @Override
+    public String getTitle() {
+        return this.getFullName();
+    }
+
+    @Override
+    public String getSnippet() {
+        return null;
     }
 }
