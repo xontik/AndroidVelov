@@ -1,5 +1,6 @@
 package fr.iutlyon1.androidvelov.model;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -143,7 +144,9 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
     }
 
     public void sort(){
-        stations.sort(Comparator.comparing(VelovStationData::isFavorite).reversed().thenComparing(VelovStationData::getName));
+        if (Build.VERSION.SDK_INT >= 24) {
+            stations.sort(Comparator.comparing(VelovStationData::isFavorite).reversed().thenComparing(VelovStationData::getName));
+        }
     }
 
     @NonNull
