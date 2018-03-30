@@ -5,4 +5,7 @@
     <stroke
         android:width="3dp"
         android:color="@color/colorBorders" />
+    <padding
+        android:left="3dp"
+        android:right="9dp" />
 </shape>
