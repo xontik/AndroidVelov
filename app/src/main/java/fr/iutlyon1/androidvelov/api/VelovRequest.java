@@ -35,7 +35,7 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
     protected VelovData doInBackground(VelovData... datas) {
         this.datas = datas;
 
-        if (!InternetUtils.isOnline()) {
+        if (!InternetUtils.isNetworkAvailable(context.get())) {
             return null;
         }
 

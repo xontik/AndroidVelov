@@ -83,30 +83,25 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
                 clusterManager.clearItems();
                 clusterManager.addItems(filteredStationList);
 
-                LatLngBounds bounds = LatLngUtils.computeBounds(filteredStationList);
-                map.animateCamera(
-                        CameraUpdateFactory.newLatLngBounds(bounds, MapUtils.MAP_PADDING));
+                if (filteredStationList.size() != 0) {
+                    LatLngBounds bounds = LatLngUtils.computeBounds(filteredStationList);
+                    map.animateCamera(
+                            CameraUpdateFactory.newLatLngBounds(bounds, MapUtils.MAP_PADDING));
+                }
             }
         });
 
         searchEmpty.setOnClickListener(view -> search.setText(""));
 
-        velovData.addOnItemsUpdateListener(data -> {
-            updateGoogleMap();
-            updateSearchBar();
-        });
+        loadData();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume() called");
 
         if (map != null) {
-            map.setOnMapLoadedCallback(() -> {
-                Log.d(TAG, "onResume: Map loaded");
-                loadData();
-            });
+            map.setOnMapLoadedCallback(this::loadData);
         }
     }
 
@@ -134,7 +129,19 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
         this.map = map;
 
         initClusterManager();
-        loadData();
+
+        velovData.addOnFirstLoadListener((velovData) -> {
+            if (!velovData.isEmpty()) {
+                LatLngBounds bounds = LatLngUtils.computeBounds(velovData.getStations());
+                map.moveCamera(
+                        CameraUpdateFactory.newLatLngBounds(bounds, MapUtils.MAP_PADDING));
+            }
+
+            velovData.addOnItemsUpdateListener(d -> {
+                updateGoogleMap();
+                updateSearchBar();
+            });
+        });
     }
 
     private void initClusterManager() {
@@ -175,7 +182,6 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
             Log.e(TAG, "loadLastSave: " + e.getMessage(), e);
         }
 
-        Log.d(TAG, "loadLastSave: savedData=" + savedData);
         if (savedData != null) {
             this.velovData.setAll(savedData.getStations());
         }
@@ -187,11 +193,6 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
 
             clusterManager.clearItems();
             clusterManager.addItems(stations);
-
-            final LatLngBounds bounds = LatLngUtils.computeBounds(stations);
-
-            map.setOnMapLoadedCallback(() -> map.moveCamera(
-                    CameraUpdateFactory.newLatLngBounds(bounds, MapUtils.MAP_PADDING)));
         }
     }
 
