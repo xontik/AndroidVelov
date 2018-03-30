@@ -2,6 +2,7 @@ package fr.iutlyon1.androidvelov.model;
 
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -178,8 +179,11 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
     }
 
     public void sort(){
-        if (Build.VERSION.SDK_INT >= 24) {
-            stations.sort(Comparator.comparing(VelovStationData::isFavorite).reversed().thenComparing(VelovStationData::getName));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Log.i("XTK", "On a le droit de sort !!!!");
+            //stations.sort(Comparator.comparing(VelovStationData::isFavorite).reversed().thenComparing(VelovStationData::getName));
+            //TODO: BUg a corriger voir avec enzo
+
         }
     }
 
