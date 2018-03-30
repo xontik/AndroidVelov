@@ -3,18 +3,27 @@ package fr.iutlyon1.androidvelov;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import fr.iutlyon1.androidvelov.api.VelovRequest;
 import fr.iutlyon1.androidvelov.display.StationListAdapter;
+import fr.iutlyon1.androidvelov.display.StationRecylcerAdapter;
+import fr.iutlyon1.androidvelov.listener.RecyclerItemClickListener;
 import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
 
+
 public class StationListActivity extends AppCompatActivity {
 
-    private ListView stationListView;
-
     private VelovData velovData;
+    private RecyclerView mRecyclerView;
+    private StationRecylcerAdapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     StationListActivity() {
         velovData = new VelovData();
@@ -25,21 +34,41 @@ public class StationListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_station_list);
 
-        stationListView = findViewById(R.id.stationListView);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
 
-        StationListAdapter adapter = new StationListAdapter(this.getBaseContext(), new VelovData());
-        stationListView.setAdapter(adapter);
+        mRecyclerView.setHasFixedSize(true);
 
-        stationListView.setOnItemClickListener((parent, view, position, id) -> {
-            Intent intent = new Intent(StationListActivity.this, StationDetailActivity.class);
-            intent.putExtra("station", (VelovStationData) adapter.getItem(position));
-            startActivity(intent);
-        });
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
 
-        velovData.addOnItemsUpdateListener(adapter::setItems);
+
+
+        mAdapter = new StationRecylcerAdapter(new VelovData());
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
+        mRecyclerView.setAdapter(mAdapter);
+
+        mRecyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(getApplicationContext(), mRecyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override public void onItemClick(View view, int position) {
+                        Intent intent = new Intent(StationListActivity.this, StationDetailActivity.class);
+                        intent.putExtra("station", (VelovStationData) mAdapter.getItem(position));
+                        startActivity(intent);
+                    }
+
+                    @Override public void onLongItemClick(View view, int position) {
+                        // do whatever
+                    }
+                })
+        );
+
+
+        velovData.addOnItemsUpdateListener(mAdapter::setItems);
 
         loadVelovData();
+
     }
+
+
 
     private void loadVelovData() {
         final String apiKey = Props.getInstance(getApplicationContext()).get("API_KEY");
