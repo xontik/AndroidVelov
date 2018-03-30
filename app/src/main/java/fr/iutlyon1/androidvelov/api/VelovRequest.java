@@ -3,6 +3,7 @@ package fr.iutlyon1.androidvelov.api;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.json.JSONException;
 
@@ -22,18 +23,30 @@ import fr.iutlyon1.androidvelov.model.VelovStationData;
 import fr.iutlyon1.androidvelov.utils.InternetUtils;
 
 public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
+    public interface OnTaskCompleted{
+        void onTaskCompleted();
+    }
+
     private static final String API_URL = "https://api.jcdecaux.com/vls/v1/stations";
 
     private WeakReference<Context> context = null;
     private final String contract;
     private final String apiKey;
+    private OnTaskCompleted listener;
 
     private VelovData[] datas = null;
 
+    public VelovRequest(Context context, String contract, String apiKey, OnTaskCompleted listener) {
+        this.context = new WeakReference<>(context);
+        this.contract = contract;
+        this.apiKey = apiKey;
+        this.listener = listener;
+    }
     public VelovRequest(Context context, String contract, String apiKey) {
         this.context = new WeakReference<>(context);
         this.contract = contract;
         this.apiKey = apiKey;
+        this.listener = null;
     }
 
     @Override
@@ -92,6 +105,11 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
         for (VelovData data : this.datas) {
             data.setAll(velovData.getStations());
         }
+        if(listener != null) {
+            listener.onTaskCompleted();
+        }
+
+
     }
 
     private URL buildURL(String url, String... parameters) {
@@ -127,7 +145,7 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
             return;
         }
         SharedPreferences sharedPref = context.getSharedPreferences(context.getString(R.string.sharedPrefFile), Context.MODE_PRIVATE);
-        HashSet favoritesString = (HashSet) sharedPref.getStringSet(context.getString(R.string.sharedPrefFavorites), new HashSet<String>());
+        HashSet<String> favoritesString = (HashSet<String>) sharedPref.getStringSet(context.getString(R.string.sharedPrefFavorites), new HashSet<String>());
 
         for (VelovStationData station : items) {
             if(favoritesString.contains(String.valueOf(station.getNumber()))){
