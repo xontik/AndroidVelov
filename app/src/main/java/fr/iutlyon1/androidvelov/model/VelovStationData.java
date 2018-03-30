@@ -22,6 +22,7 @@ public class VelovStationData implements Serializable, ClusterItem {
     private int availableBikeStands;
     private int availableBikes;
     private Date lastUpdate;
+    private boolean favorite;
 
     public VelovStationData(int number, String name, String address, LatLng position,
                             boolean banking, boolean bonus, String status, String contractName,
@@ -39,6 +40,7 @@ public class VelovStationData implements Serializable, ClusterItem {
         this.availableBikeStands = availableBikeStands;
         this.availableBikes = availableBikes;
         this.lastUpdate = new Date(lastUpdate);
+        this.favorite = false;
     }
 
     public boolean matches(String searchString) {
@@ -199,5 +201,13 @@ public class VelovStationData implements Serializable, ClusterItem {
     @Override
     public String toString() {
         return this.getFullName();
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
+    }
+
+    public boolean isFavorite() {
+        return favorite;
     }
 }
