@@ -34,6 +34,7 @@ import fr.iutlyon1.androidvelov.display.StationRecylcerAdapter;
 import fr.iutlyon1.androidvelov.listener.RecyclerItemClickListener;
 import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
+import fr.iutlyon1.androidvelov.utils.InternetUtils;
 import fr.iutlyon1.androidvelov.utils.LatLngUtils;
 
 
@@ -92,7 +93,7 @@ public class StationListActivity extends AppCompatActivity implements VelovReque
 
                         Context context = getApplicationContext();
                         SharedPreferences sharedPref = context.getSharedPreferences(context.getString(R.string.sharedPrefFile), Context.MODE_PRIVATE);
-                        HashSet favoritesString = (HashSet) sharedPref.getStringSet(context.getString(R.string.sharedPrefFavorites), new HashSet<String>());
+                        HashSet<String> favoritesString = (HashSet<String>) sharedPref.getStringSet(context.getString(R.string.sharedPrefFavorites), new HashSet<String>());
                         SharedPreferences.Editor editor = sharedPref.edit();
 
                         if (current.isFavorite()) {
@@ -103,49 +104,69 @@ public class StationListActivity extends AppCompatActivity implements VelovReque
                             favoritesString.add(String.valueOf(current.getNumber()));
                         }
 
+
+
                         editor.clear();
                         editor.putStringSet(context.getString(R.string.sharedPrefFavorites), favoritesString);
                         editor.commit();
+
                         mAdapter.setItem(position, current);
 
                     }
                 })
         );
 
-        mSwipeRefresh.setOnRefreshListener(() -> loadVelovData());
+        mSwipeRefresh.setOnRefreshListener(() -> {
+            updatelastLocation();
+            loadData();
+        });
 
         velovData.addOnItemsUpdateListener(mAdapter::setItems);
-
-        if(!checkLocationPermission()){
-            mAdapter.setComparator((o1,o2) -> o1.getName().compareTo(o2.getName()));
-        } else {
-            mFusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, location -> {
-                    // Got last known location. In some rare situations this can be null.
-                    if (location != null) {
-                        Toast.makeText(getApplicationContext(), "Location ok", Toast.LENGTH_SHORT).show();
-                        LatLng currentLatLng = new LatLng(location.getLatitude(),location.getLongitude());
-                        mAdapter.setComparator((o1,o2) ->
-                            LatLngUtils.computeDistance(o1.getPosition(), currentLatLng) < LatLngUtils.computeDistance(o2.getPosition(), currentLatLng)? -1 : 1
-                        );
-
-                    }
-                });
-
-        }
-
-        loadVelovData();
 
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updatelastLocation();
+        loadData();
+    }
 
-    private void loadVelovData() {
+    private void updatelastLocation(){
+        if(!checkLocationPermission()){
+            mAdapter.setComparator((o1,o2) -> o1.getName().compareTo(o2.getName()));
+        } else {
+            mFusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, location -> {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            LatLng currentLatLng = new LatLng(location.getLatitude(),location.getLongitude());
+                            mAdapter.setComparator((o1,o2) ->
+                                    LatLngUtils.computeDistance(o1.getPosition(), currentLatLng) < LatLngUtils.computeDistance(o2.getPosition(), currentLatLng)? -1 : 1
+                            );
+
+                        }
+                    });
+
+        }
+    }
+
+    private void loadData() {
         final String apiKey = Props.getInstance(getApplicationContext()).get("API_KEY");
 
-        VelovRequest velovRequest = new VelovRequest(this, "Lyon", apiKey, this);
-        velovRequest.execute(velovData);
+        if (!InternetUtils.isNetworkAvailable(this)) {
+            Toast.makeText(this, R.string.toast_loadSavedData , Toast.LENGTH_SHORT)
+                    .show();
+            velovData.loadLastSave(getApplicationContext());
+            velovData.processFavorites(getApplicationContext());
+            mAdapter.setItems(velovData);
+            mSwipeRefresh.setRefreshing(false);
 
+        } else {
+            final VelovRequest request = new VelovRequest(this, "Lyon", apiKey, this);
+            request.execute(velovData);
+        }
     }
 
     @Override
@@ -194,26 +215,9 @@ public class StationListActivity extends AppCompatActivity implements VelovReque
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+    protected void onStop() {
 
-
-
-                } else {
-                    Toast.makeText(getApplicationContext(), "Location nok", Toast.LENGTH_SHORT).show();;
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-
-                }
-                return;
-            }
-
-        }
+        this.mAdapter.getDataset().save(getApplicationContext());
+        super.onStop();
     }
 }
