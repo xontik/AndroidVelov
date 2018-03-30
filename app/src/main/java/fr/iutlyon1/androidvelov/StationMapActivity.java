@@ -112,20 +112,8 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
 
     @Override
     protected void onStop() {
-        OutputStream out;
-        ObjectOutputStream oos;
 
-        try {
-            out = openFileOutput(SAVE_FILE, Context.MODE_PRIVATE);
-            oos = new ObjectOutputStream(out);
-
-            oos.writeObject(velovData);
-
-            oos.close();
-        } catch (IOException e) {
-            Log.e(TAG, "onStop: " + e.getMessage(), e);
-        }
-
+        this.velovData.save(getApplicationContext());
         super.onStop();
     }
 
@@ -152,34 +140,14 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
         if (!InternetUtils.isNetworkAvailable(this)) {
             Toast.makeText(this, R.string.toast_loadSavedData , Toast.LENGTH_SHORT)
                     .show();
-            loadLastSave();
+            velovData.loadLastSave(getApplicationContext());
         } else {
             final VelovRequest request = new VelovRequest(this, "Lyon", apiKey);
             request.execute(velovData);
         }
     }
 
-    private void loadLastSave() {
-        InputStream in;
-        ObjectInputStream ois;
-        VelovData savedData = null;
 
-        try {
-            in = openFileInput(SAVE_FILE);
-            ois = new ObjectInputStream(in);
-
-            savedData = (VelovData) ois.readObject();
-
-            ois.close();
-        } catch (IOException|ClassNotFoundException e) {
-            Log.e(TAG, "loadLastSave: " + e.getMessage(), e);
-        }
-
-        Log.d(TAG, "loadLastSave: savedData=" + savedData);
-        if (savedData != null) {
-            this.velovData.setAll(savedData.getStations());
-        }
-    }
 
     private void updateGoogleMap() {
         if (map != null && clusterManager != null && !velovData.isEmpty()) {

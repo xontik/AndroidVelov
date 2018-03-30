@@ -107,4 +107,8 @@ public class StationRecylcerAdapter extends RecyclerView.Adapter<StationRecylcer
         notifyDataSetChanged();
 
     }
+
+    public VelovData getDataset(){
+        return mDataset;
+    }
 }

@@ -51,7 +51,7 @@ public class VelovStationData implements Serializable, ClusterItem {
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
-        out.write(number);
+        out.writeInt(number);
         out.writeObject(name);
         out.writeObject(address);
         out.writeDouble(position.latitude);
@@ -60,14 +60,15 @@ public class VelovStationData implements Serializable, ClusterItem {
         out.writeBoolean(bonus);
         out.writeObject(status);
         out.writeObject(contractName);
-        out.write(bikeStands);
-        out.write(availableBikeStands);
-        out.write(availableBikes);
+        out.writeInt(bikeStands);
+        out.writeInt(availableBikeStands);
+        out.writeInt(availableBikes);
         out.writeObject(lastUpdate);
+        out.writeBoolean(favorite);
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        this.number = in.read();
+        this.number = in.readInt();
         this.name = (String) in.readObject();
         this.address = (String) in.readObject();
         double lat = in.readDouble(),
@@ -77,10 +78,13 @@ public class VelovStationData implements Serializable, ClusterItem {
         this.bonus = in.readBoolean();
         this.status = (String) in.readObject();
         this.contractName = (String) in.readObject();
-        this.bikeStands = in.read();
-        this.availableBikeStands = in.read();
-        this.availableBikes = in.read();
+        this.bikeStands = in.readInt();
+        this.availableBikeStands = in.readInt();
+        this.availableBikes = in.readInt();
         this.lastUpdate = (Date) in.readObject();
+        this.favorite = in.readBoolean();
+
+
     }
 
     public int getNumber() {
@@ -210,4 +214,5 @@ public class VelovStationData implements Serializable, ClusterItem {
     public boolean isFavorite() {
         return favorite;
     }
+
 }

@@ -100,7 +100,7 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
             return;
         }
 
-        processFavorites(velovData);
+        velovData.processFavorites(this.context.get());
 
         for (VelovData data : this.datas) {
             data.setAll(velovData.getStations());
@@ -139,18 +139,5 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
 
     }
 
-    private void processFavorites(VelovData items ){
-        Context context = this.context.get();
-        if(context == null){
-            return;
-        }
-        SharedPreferences sharedPref = context.getSharedPreferences(context.getString(R.string.sharedPrefFile), Context.MODE_PRIVATE);
-        HashSet<String> favoritesString = (HashSet<String>) sharedPref.getStringSet(context.getString(R.string.sharedPrefFavorites), new HashSet<String>());
 
-        for (VelovStationData station : items) {
-            if(favoritesString.contains(String.valueOf(station.getNumber()))){
-                station.setFavorite(true);
-            }
-        }
-    }
 }
