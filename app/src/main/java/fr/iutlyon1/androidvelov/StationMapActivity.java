@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,7 +51,7 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
 
     private VelovData velovData;
 
-    StationMapActivity() {
+    public StationMapActivity() {
         velovData = new VelovData();
     }
 
@@ -194,6 +195,11 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
             selectedStation = station;
             return false;
         });
+        clusterManager.setOnClusterClickListener(cluster -> {
+            selectedStation = null;
+            return false;
+        });
+
         clusterManager.setOnClusterItemInfoWindowClickListener(velovStationData -> {
             Intent intent = new Intent(StationMapActivity.this, StationDetailActivity.class);
             intent.putExtra("station", velovStationData);
@@ -201,11 +207,12 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
             startActivity(intent);
         });
 
-        map.setInfoWindowAdapter(new VelovInfoWindow());
+        clusterManager.getMarkerCollection().setOnInfoWindowAdapter(new VelovInfoWindow());
 
         map.setOnCameraIdleListener(clusterManager);
         map.setOnMarkerClickListener(clusterManager);
         map.setOnInfoWindowClickListener(clusterManager);
+        map.setInfoWindowAdapter(clusterManager.getMarkerManager());
     }
 
     private void updateGoogleMap() {
@@ -233,20 +240,33 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
     private class VelovInfoWindow implements GoogleMap.InfoWindowAdapter {
         private final View view;
         VelovInfoWindow() {
-            view = getLayoutInflater().inflate(R.layout.info_window, null);
+            view = getLayoutInflater().inflate(R.layout.list_item, null);
         }
 
         @Override
         public View getInfoWindow(Marker marker) {
-            final TextView title = view.findViewById(R.id.title);
-            final TextView bikes = view.findViewById(R.id.availableBikes);
-            final TextView stands = view.findViewById(R.id.availableBikeStands);
+            if (selectedStation == null)
+                return null;
 
-            title.setText(selectedStation.getFullName());
-            bikes.setText(
-                    getString(R.string.listItemAvailableBikes, selectedStation.getAvailableBikes()));
-            stands.setText(
-                    getString(R.string.listItemAvailableBikeStands, selectedStation.getAvailableBikeStands()));
+            view.setBackground(getDrawable(R.drawable.window_info_background));
+
+            final ImageView favorite = view.findViewById(R.id.favoriteIcon);
+            final TextView name = view.findViewById(R.id.stationName);
+            final ImageView bikeIcon = view.findViewById(R.id.bikeIcon);
+            final TextView availableBikes = view.findViewById(R.id.stationAvailableBikes);
+            final ImageView standIcon = view.findViewById(R.id.standIcon);
+            final TextView availableStands = view.findViewById(R.id.stationAvailableBikeStands);
+
+            favorite.setImageResource(selectedStation.isFavorite()
+                ? R.drawable.ic_favorite_black_24dp
+                : R.drawable.ic_favorite_border_black_24dp);
+            name.setText(selectedStation.getFullName());
+
+            bikeIcon.setImageResource(R.drawable.ic_directions_bike_black_24dp);
+            availableBikes.setText(String.valueOf(selectedStation.getAvailableBikes()));
+
+            standIcon.setImageResource(R.drawable.ic_local_parking_black_24dp);
+            availableStands.setText(String.valueOf(selectedStation.getAvailableBikeStands()));
 
             return view;
         }

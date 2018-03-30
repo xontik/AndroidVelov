@@ -22,7 +22,7 @@ public class StationListActivity extends AppCompatActivity {
     private StationRecylcerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    StationListActivity() {
+    public StationListActivity() {
         velovData = new VelovData();
     }
 

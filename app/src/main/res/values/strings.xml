@@ -1,11 +1,6 @@
 <resources>
     <string name="app_name">AndroidVelov</string>
 
-    <!-- LIST ACTIVITY -->
-    <string name="listItemStatus">Etat :</string>
-    <string name="listItemAvailableBikes">Velo dispo : %1$d</string>
-    <string name="listItemAvailableBikeStands">Place dispo : %1$d</string>
-
     <!-- MAP ACTIVITY -->
     <string name="title_activity_station_map">Map</string>
     <string name="station_map_search_hint">Rechercher une station</string>
@@ -23,7 +18,6 @@
     <string name="dialog_cancel">Annuler</string>
     <string name="dialog_yes">Oui</string>
     <string name="dialog_no">Non</string>
-
 
     <string name="sharedPrefFile">pref</string>
     <string name="sharedPrefFavorites">favorites</string>
