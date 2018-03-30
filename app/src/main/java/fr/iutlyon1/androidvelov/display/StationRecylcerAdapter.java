@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.Comparator;
+
 import fr.iutlyon1.androidvelov.R;
 import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
@@ -19,6 +21,7 @@ import fr.iutlyon1.androidvelov.model.VelovStationData;
 public class StationRecylcerAdapter extends RecyclerView.Adapter<StationRecylcerAdapter.ViewHolder> {
 
     private VelovData mDataset;
+    private Comparator<VelovStationData> mComparator;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
@@ -40,8 +43,9 @@ public class StationRecylcerAdapter extends RecyclerView.Adapter<StationRecylcer
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public StationRecylcerAdapter(VelovData myDataset) {
+    public StationRecylcerAdapter(VelovData myDataset, Comparator<VelovStationData> comparator) {
         mDataset = myDataset;
+        mComparator = comparator;
     }
 
     // Create new views (invoked by the layout manager)
@@ -84,7 +88,7 @@ public class StationRecylcerAdapter extends RecyclerView.Adapter<StationRecylcer
 
     public void setItems(VelovData items) {
         this.mDataset = items;
-        mDataset.sort();
+        mDataset.sort(this.mComparator);
         notifyDataSetChanged();
     }
 
@@ -95,5 +99,12 @@ public class StationRecylcerAdapter extends RecyclerView.Adapter<StationRecylcer
     public void setItem(int position, VelovStationData item) {
         mDataset.set(position, item);
         notifyItemChanged(position);
+    }
+
+    public void setComparator(Comparator<VelovStationData> c){
+        this.mComparator = c;
+        mDataset.sort(this.mComparator);
+        notifyDataSetChanged();
+
     }
 }

@@ -19,6 +19,8 @@
     <string name="dialog_yes">Oui</string>
     <string name="dialog_no">Non</string>
 
+    <string name="title_location_permission">Permission de localisation</string>
+    <string name="text_location_permission">Afin de trouver les stations les plus proches, il est nécessaire d\'accéder à votre localisation</string>
 
     <string name="sharedPrefFile">pref</string>
     <string name="sharedPrefFavorites">favorites</string>

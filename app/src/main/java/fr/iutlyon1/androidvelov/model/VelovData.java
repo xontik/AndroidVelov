@@ -9,9 +9,12 @@ import com.google.android.gms.maps.model.LatLng;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+
+import fr.iutlyon1.androidvelov.utils.LatLngUtils;
 
 public class VelovData implements Iterable<VelovStationData>, Serializable {
     public interface ItemUpdateListener {
@@ -58,11 +61,11 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         final Iterator<VelovStationData> it = stations.iterator();
 
         VelovStationData nearest = it.next();
-        double nearestDistance = computeDistance(position, nearest.getPosition());
+        double nearestDistance = LatLngUtils.computeDistance(position, nearest.getPosition());
 
         while (it.hasNext()) {
             VelovStationData station = it.next();
-            double distance = computeDistance(position, station.getPosition());
+            double distance = LatLngUtils.computeDistance(position, station.getPosition());
 
             if (distance < nearestDistance) {
                 nearest = station;
@@ -73,12 +76,7 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         return nearest;
     }
 
-    private double computeDistance(LatLng from, LatLng to) {
-        double lat= to.latitude - from.latitude;
-        double lng = to.longitude - from.longitude;
 
-        return Math.sqrt(Math.pow(lat, 2) + Math.pow(lng, 2));
-    }
 
     public void addOnItemsUpdateListener(ItemUpdateListener listener) {
         this.itemUpdateListeners.add(listener);
@@ -144,13 +142,38 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         return wasRemoved;
     }
 
-    public void sort(){
+    public void sort(Comparator<VelovStationData> c){
+        /*
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Log.i("XTK", "On a le droit de sort !!!!");
             //stations.sort(Comparator.comparing(VelovStationData::isFavorite).reversed().thenComparing(VelovStationData::getName));
             //TODO: BUg a corriger voir avec enzo
 
         }
+        */
+
+        Collections.sort(stations, (o1, o2) -> {
+            if(o1.isFavorite()){
+                if(!o2.isFavorite()){
+                    return -1;
+                }
+            } else {
+                if(o2.isFavorite()){
+                    return 1;
+                }
+            }
+            if(c == null){
+                return 0;
+            }
+
+            return c.compare(o1,o2);
+
+
+        } );
+    }
+
+    public void sort(){
+        this.sort(null);
     }
 
     @NonNull
