@@ -33,7 +33,7 @@ public class StationListActivity extends AppCompatActivity implements VelovReque
     private RecyclerView.LayoutManager mLayoutManager;
     private SwipeRefreshLayout mSwipeRefresh;
 
-    StationListActivity() {
+    public StationListActivity() {
         velovData = new VelovData();
     }
 

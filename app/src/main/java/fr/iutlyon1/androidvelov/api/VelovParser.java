@@ -16,7 +16,7 @@ import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
 
 class VelovParser {
-
+    private static final String TAG = "VelovParser";
     private Reader in;
 
     VelovParser(Reader in) {
@@ -56,7 +56,7 @@ class VelovParser {
         try {
             name = name.split("-", 2)[1].trim();
         } catch (IndexOutOfBoundsException e) {
-            Log.e("ParseVelov", "parseStation: name=" + name, e);
+            Log.e(TAG, "parseStation: " + e.getMessage(), e);
         }
 
         String address = object.optString("address");

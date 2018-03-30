@@ -17,13 +17,23 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         void onItemUpdate(VelovData velovData);
     }
 
+    public interface FirstLoadListener {
+        void onFirstLoad(VelovData velovData);
+    }
+
     private List<VelovStationData> stations = null;
+    private transient boolean wasLoaded;
 
     private transient List<ItemUpdateListener> itemUpdateListeners = null;
+    private transient List<FirstLoadListener> firstLoadListeners = null;
+
 
     public VelovData() {
         this.stations = new ArrayList<>();
+        this.wasLoaded = false;
+
         this.itemUpdateListeners = new ArrayList<>();
+        this.firstLoadListeners = new ArrayList<>();
     }
 
     public VelovStationData get(int index) {
@@ -87,10 +97,25 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         this.itemUpdateListeners.remove(listener);
     }
 
+    public void addOnFirstLoadListener(FirstLoadListener listener) {
+        if (wasLoaded)
+            listener.onFirstLoad(this);
+        else
+            firstLoadListeners.add(listener);
+    }
+
     private void notifyItemsUpdated() {
         for (ItemUpdateListener listener : itemUpdateListeners) {
             listener.onItemUpdate(this);
         }
+    }
+
+    private void notifyFirstLoad() {
+        wasLoaded = true;
+        for (FirstLoadListener listener : firstLoadListeners) {
+            listener.onFirstLoad(this);
+        }
+        firstLoadListeners.clear();
     }
 
     public int size() {
@@ -107,23 +132,32 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
 
     public boolean add(VelovStationData velovStationData) {
         boolean wasAdded = stations.add(velovStationData);
-        if (wasAdded) {
+
+        if (!wasLoaded)
+            notifyFirstLoad();
+        if (wasAdded)
             notifyItemsUpdated();
-        }
+
         return wasAdded;
     }
 
     public boolean addAll(@NonNull Collection<? extends VelovStationData> c) {
         boolean wasAdded = stations.addAll(c);
-        if (wasAdded) {
+
+        if (wasLoaded)
+            notifyFirstLoad();
+        if (wasAdded)
             notifyItemsUpdated();
-        }
+
         return wasAdded;
     }
 
     public void setAll(@NonNull Collection<? extends VelovStationData> c) {
         this.stations.clear();
         this.stations.addAll(c);
+
+        if (!wasLoaded)
+            notifyFirstLoad();
         notifyItemsUpdated();
     }
 
