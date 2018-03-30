@@ -7,6 +7,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
 
     public VelovStationData get(int index) {
         return stations.get(index);
+    }
+    public void set(int index, VelovStationData item) {
+        stations.set(index, item);
     }
 
     public List<VelovStationData> getStations() {
@@ -136,6 +140,10 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
             notifyItemsUpdated();
         }
         return wasRemoved;
+    }
+
+    public void sort(){
+        stations.sort(Comparator.comparing(VelovStationData::isFavorite).reversed().thenComparing(VelovStationData::getName));
     }
 
     @NonNull

@@ -84,10 +84,16 @@ public class StationRecylcerAdapter extends RecyclerView.Adapter<StationRecylcer
 
     public void setItems(VelovData items) {
         this.mDataset = items;
+        mDataset.sort();
         notifyDataSetChanged();
     }
 
     public VelovStationData getItem(int position){
         return mDataset.get(position);
+    }
+
+    public void setItem(int position, VelovStationData item) {
+        mDataset.set(position, item);
+        notifyItemChanged(position);
     }
 }

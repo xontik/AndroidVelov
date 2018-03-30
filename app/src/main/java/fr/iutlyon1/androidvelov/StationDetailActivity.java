@@ -21,7 +21,7 @@ public class StationDetailActivity extends AppCompatActivity {
         String data = String.format(Locale.FRANCE, "<!DOCTYPE html>\n" +
                         "<html>\n" +
                         "    <body>\n" +
-                        "        <h1>%s#%s</h1>\n" +
+                        "        <h1>%s#%d</h1>\n" +
                         "        <ul>\n" +
                         "            <li><strong>Emplacement : </strong>%s</li>\n" +
                         "            <li><strong>Latitude : </strong>%f</li>\n" +
