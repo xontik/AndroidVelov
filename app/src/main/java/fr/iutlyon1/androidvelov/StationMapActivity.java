@@ -1,13 +1,16 @@
 package fr.iutlyon1.androidvelov;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -15,6 +18,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.maps.android.clustering.ClusterManager;
 
 import java.io.IOException;
@@ -78,6 +82,8 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
                 String searchString = s.toString();
 
                 ViewUtils.animateVisibility(searchEmpty, !searchString.isEmpty());
+                if (clusterManager == null)
+                    return;
 
                 List<VelovStationData> filteredStationList = velovData.find(searchString);
                 clusterManager.clearItems();
@@ -144,15 +150,6 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
         });
     }
 
-    private void initClusterManager() {
-        clusterManager = new ClusterManager<>(this, map);
-
-        clusterManager.setRenderer(new VelovClusterRenderer(this, map, clusterManager));
-
-        map.setOnCameraIdleListener(clusterManager);
-        map.setOnMarkerClickListener(clusterManager);
-    }
-
     private void loadData() {
         final String apiKey = Props.getInstance(getApplicationContext()).get("API_KEY");
 
@@ -187,6 +184,30 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
         }
     }
 
+    private VelovStationData selectedStation = null;
+
+    private void initClusterManager() {
+        clusterManager = new ClusterManager<>(this, map);
+
+        clusterManager.setRenderer(new VelovClusterRenderer(this, map, clusterManager));
+        clusterManager.setOnClusterItemClickListener(station -> {
+            selectedStation = station;
+            return false;
+        });
+        clusterManager.setOnClusterItemInfoWindowClickListener(velovStationData -> {
+            Intent intent = new Intent(StationMapActivity.this, StationDetailActivity.class);
+            intent.putExtra("station", velovStationData);
+
+            startActivity(intent);
+        });
+
+        map.setInfoWindowAdapter(new VelovInfoWindow());
+
+        map.setOnCameraIdleListener(clusterManager);
+        map.setOnMarkerClickListener(clusterManager);
+        map.setOnInfoWindowClickListener(clusterManager);
+    }
+
     private void updateGoogleMap() {
         if (map != null && clusterManager != null && !velovData.isEmpty()) {
             final List<VelovStationData> stations = velovData.getStations();
@@ -207,5 +228,32 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
                 android.R.layout.simple_list_item_1,
                 names);
         search.setAdapter(adapter);
+    }
+
+    private class VelovInfoWindow implements GoogleMap.InfoWindowAdapter {
+        private final View view;
+        VelovInfoWindow() {
+            view = getLayoutInflater().inflate(R.layout.info_window, null);
+        }
+
+        @Override
+        public View getInfoWindow(Marker marker) {
+            final TextView title = view.findViewById(R.id.title);
+            final TextView bikes = view.findViewById(R.id.availableBikes);
+            final TextView stands = view.findViewById(R.id.availableBikeStands);
+
+            title.setText(selectedStation.getFullName());
+            bikes.setText(
+                    getString(R.string.listItemAvailableBikes, selectedStation.getAvailableBikes()));
+            stands.setText(
+                    getString(R.string.listItemAvailableBikeStands, selectedStation.getAvailableBikeStands()));
+
+            return view;
+        }
+
+        @Override
+        public View getInfoContents(Marker marker) {
+            return null;
+        }
     }
 }
