@@ -5,9 +5,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import fr.iutlyon1.androidvelov.R;
 import fr.iutlyon1.androidvelov.model.VelovData;
@@ -24,17 +23,17 @@ public class StationRecylcerAdapter extends RecyclerView.Adapter<StationRecylcer
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public TextView stationName;
-        public TextView stationStatus;
         public TextView stationAvailableBike;
         public TextView stationAvailableBikeStands;
+        public ImageView favoriteIcon;
         public Context context;
 
         public ViewHolder(View v) {
             super(v);
             stationName = (TextView) v.findViewById(R.id.stationName) ;
-            stationStatus = (TextView) v.findViewById(R.id.stationStatus) ;
             stationAvailableBike = (TextView) v.findViewById(R.id.stationAvailableBikes) ;
-            stationAvailableBikeStands = (TextView) v.findViewById(R.id.stationAvailableBikeStands) ;
+            stationAvailableBikeStands = (TextView) v.findViewById(R.id.stationAvailableBikeStands);
+            favoriteIcon = v.findViewById(R.id.favoriteIcon);
             context = v.getContext();
 
         }
@@ -66,9 +65,14 @@ public class StationRecylcerAdapter extends RecyclerView.Adapter<StationRecylcer
 
         holder.stationName.setText(currentItem.getName());
 
-        holder.stationStatus.setText(holder.context.getString(R.string.listItemStatus, currentItem.getStatus()));
-        holder.stationAvailableBike.setText(holder.context.getString(R.string.listItemAvailableBikes , currentItem.getAvailableBikes()));
-        holder.stationAvailableBikeStands.setText(holder.context.getString(R.string.listItemAvailableBikeStands, currentItem.getAvailableBikeStands()));
+        holder.stationAvailableBike.setText(String.valueOf(currentItem.getAvailableBikes()));
+        holder.stationAvailableBikeStands.setText(String.valueOf(currentItem.getAvailableBikeStands()));
+
+        if(currentItem.isFavorite()){
+            holder.favoriteIcon.setImageResource(R.drawable.ic_favorite_black_24dp);
+        } else {
+            holder.favoriteIcon.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+        }
 
     }
 

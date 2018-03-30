@@ -7,11 +7,8 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.ListView;
-import android.widget.Toast;
 
 import fr.iutlyon1.androidvelov.api.VelovRequest;
-import fr.iutlyon1.androidvelov.display.StationListAdapter;
 import fr.iutlyon1.androidvelov.display.StationRecylcerAdapter;
 import fr.iutlyon1.androidvelov.listener.RecyclerItemClickListener;
 import fr.iutlyon1.androidvelov.model.VelovData;
