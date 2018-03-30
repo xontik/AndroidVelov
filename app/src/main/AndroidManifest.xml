@@ -19,7 +19,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".StationListActivity" />
+        <activity android:name=".StationListActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name=".StationDetailActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -36,11 +41,7 @@
         <activity
             android:name=".StationMapActivity"
             android:label="@string/title_activity_station_map">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
     </application>
 

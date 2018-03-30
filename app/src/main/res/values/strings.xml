@@ -23,4 +23,9 @@
     <string name="dialog_cancel">Annuler</string>
     <string name="dialog_yes">Oui</string>
     <string name="dialog_no">Non</string>
+
+
+    <string name="sharedPrefFile">pref</string>
+    <string name="sharedPrefFavorites">favorites</string>
+
 </resources>

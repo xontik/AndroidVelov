@@ -1,6 +1,7 @@
 package fr.iutlyon1.androidvelov.api;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 
 import org.json.JSONException;
@@ -10,10 +11,14 @@ import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import fr.iutlyon1.androidvelov.R;
 import fr.iutlyon1.androidvelov.model.VelovData;
+import fr.iutlyon1.androidvelov.model.VelovStationData;
 import fr.iutlyon1.androidvelov.utils.InternetUtils;
 
 public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
@@ -73,6 +78,7 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
 
     @Override
     protected void onPostExecute(VelovData velovData) {
+
         if (velovData == null) {
             Context context = this.context.get();
             if (context != null) {
@@ -80,6 +86,8 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
             }
             return;
         }
+
+        processFavorites(velovData);
 
         for (VelovData data : this.datas) {
             data.setAll(velovData.getStations());
@@ -111,5 +119,20 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
             return null;
         }
 
+    }
+
+    private void processFavorites(VelovData items ){
+        Context context = this.context.get();
+        if(context == null){
+            return;
+        }
+        SharedPreferences sharedPref = context.getSharedPreferences(context.getString(R.string.sharedPrefFile), Context.MODE_PRIVATE);
+        HashSet favoritesString = (HashSet) sharedPref.getStringSet(context.getString(R.string.sharedPrefFavorites), new HashSet<String>());
+
+        for (VelovStationData station : items) {
+            if(favoritesString.contains(String.valueOf(station.getNumber()))){
+                station.setFavorite(true);
+            }
+        }
     }
 }
