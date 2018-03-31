@@ -152,14 +152,12 @@ public class StationMapActivity extends FragmentActivity implements OnMapReadyCa
     }
 
     private void loadData() {
-        final String apiKey = Props.getInstance(getApplicationContext()).get("API_KEY");
-
         if (!InternetUtils.isNetworkAvailable(this)) {
             Toast.makeText(this, R.string.toast_loadSavedData , Toast.LENGTH_SHORT)
                     .show();
             loadLastSave();
         } else {
-            final VelovRequest request = new VelovRequest(this, "Lyon", apiKey);
+            final VelovRequest request = new VelovRequest(this, "Lyon");
             request.execute(velovData);
         }
     }
