@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="content_descr_delete_text">Supprimer le contenu</string>
+    <string name="content_descr_favorite_icon">Icône favoris</string>
 </resources>

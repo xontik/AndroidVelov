@@ -7,17 +7,36 @@
     <string name="nav_header_title">AndroidVelov</string>
     <string name="nav_header_subtitle">Sous-titre</string>
     <string name="nav_header_desc">En-tête de navigation</string>
-    <string name="action_settings">Paramêtres</string>
 
     <!-- MAIN ACTIVITY -->
     <string name="title_activity_main">MainActivity</string>
 
-    <!-- LIST ACTIVITY -->
-    <string name="title_activity_station_list">Liste</string>
-
-    <!-- MAP ACTIVITY -->
-    <string name="title_activity_station_map">Carte</string>
+    <!-- MAP FRAGMENT -->
+    <string name="title_fragment_station_map">Carte</string>
     <string name="station_map_search_hint">Rechercher une station</string>
+
+    <!-- LIST FRAGMENT -->
+    <string name="title_fragment_station_list">Liste</string>
+
+    <!-- DETAILS FRAGMENT -->
+    <string name="title_fragment_station_detail">Détails</string>
+
+    <string name="data_address">Emplacement : </string>
+    <string name="data_latitude">Latitude : </string>
+    <string name="data_longitude">Longitude : </string>
+    <string name="data_banking">Paiement : </string>
+    <string name="data_bonus">Bonus : </string>
+    <string name="data_status">État : </string>
+    <string name="data_contractName">Ville : </string>
+    <string name="data_bikeStands">Emplacements total : </string>
+    <string name="data_availableBikeStands">Emplacement disponibles : </string>
+    <string name="data_availableBikes">Vélos disponibles : </string>
+    <string name="data_lastUpdate">Dernière mise à jour : </string>
+
+    <string name="data_banking_true">Disponible</string>
+    <string name="data_banking_false">Indisponible</string>
+    <string name="data_bonus_true">Oui</string>
+    <string name="data_bonus_false">Non</string>
 
     <!-- DIALOGS -->
     <string name="toast_loadSavedData">Connexion impossible. Affichage des dernières données téléchargées.</string>
@@ -35,5 +54,8 @@
 
     <string name="sharedPrefFile">pref</string>
     <string name="sharedPrefFavorites">favorites</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
