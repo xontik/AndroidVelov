@@ -44,11 +44,7 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
         this.contract = contract;
         this.listener = listener;
     }
-
-    public VelovRequest(Context context, String contract) {
-        this(context, contract, null);
-    }
-
+    
     @Override
     protected VelovData doInBackground(VelovData... datas) {
         this.datas = datas;

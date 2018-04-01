@@ -24,7 +24,8 @@ import fr.iutlyon1.androidvelov.model.VelovStationData;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-            StationListFragment.OnListFragmentInteractionListener {
+            StationListFragment.OnListFragmentInteractionListener,
+            StationMapFragment.OnMapFragmentInteractionListener {
 
     private DrawerLayout drawer;
 
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        showFragmentList();
+        showFragmentMap();
     }
 
     @Override
@@ -110,6 +111,7 @@ public class MainActivity extends AppCompatActivity
 
         switch (id) {
             case R.id.nav_map:
+                showFragmentMap();
                 break;
             case R.id.nav_list:
                 showFragmentList();
@@ -123,10 +125,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void showFragmentMap() {
+        if (this.fragmentMap == null)
+            this.fragmentMap = StationMapFragment.newInstance(mDataset);
+        this.startTransactionFragment(this.fragmentMap);
     }
 
     private void showFragmentList() {
-        if (this.fragmentList == null) this.fragmentList = StationListFragment.newInstance(mDataset);
+        if (this.fragmentList == null)
+            this.fragmentList = StationListFragment.newInstance(mDataset);
         this.startTransactionFragment(this.fragmentList);
     }
 
@@ -139,11 +145,20 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onListFragmentClick(int position, VelovStationData station) {
+    private void showStationDetails(VelovStationData station) {
         Intent intent = new Intent(MainActivity.this, StationDetailActivity.class);
         intent.putExtra("station", station);
         startActivity(intent);
+    }
+
+    @Override
+    public void onInfoWindowClick(VelovStationData station) {
+        showStationDetails(station);
+    }
+
+    @Override
+    public void onListFragmentClick(int position, VelovStationData station) {
+        showStationDetails(station);
     }
 
     @Override
