@@ -83,8 +83,6 @@ public class VelovStationData implements Serializable, ClusterItem {
         this.availableBikes = in.readInt();
         this.lastUpdate = (Date) in.readObject();
         this.favorite = in.readBoolean();
-
-
     }
 
     public int getNumber() {
@@ -192,6 +190,14 @@ public class VelovStationData implements Serializable, ClusterItem {
         this.lastUpdate = lastUpdate;
     }
 
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
+    }
+
     @Override
     public String getTitle() {
         return this.getFullName();
@@ -206,13 +212,4 @@ public class VelovStationData implements Serializable, ClusterItem {
     public String toString() {
         return this.getFullName();
     }
-
-    public void setFavorite(boolean favorite) {
-        this.favorite = favorite;
-    }
-
-    public boolean isFavorite() {
-        return favorite;
-    }
-
 }

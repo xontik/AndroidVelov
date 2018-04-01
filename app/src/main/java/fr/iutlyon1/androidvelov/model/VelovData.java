@@ -2,9 +2,9 @@ package fr.iutlyon1.androidvelov.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -23,9 +23,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import fr.iutlyon1.androidvelov.R;
+import fr.iutlyon1.androidvelov.api.VelovRequest;
+import fr.iutlyon1.androidvelov.utils.InternetUtils;
 import fr.iutlyon1.androidvelov.utils.LatLngUtils;
-
-import static android.content.ContentValues.TAG;
 
 public class VelovData implements Iterable<VelovStationData>, Serializable {
     public interface ItemUpdateListener {
@@ -35,13 +35,15 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
     public interface FirstLoadListener {
         void onFirstLoad(VelovData velovData);
     }
-    private static final String SAVE_FILE = "velocData.ser";
 
-    private List<VelovStationData> stations = null;
+    private static final String TAG = "VelovData";
+    private static final String SAVE_FILE = "dataset.ser";
+
+    private List<VelovStationData> stations;
     private transient boolean wasLoaded;
 
-    private transient List<ItemUpdateListener> itemUpdateListeners = null;
-    private transient List<FirstLoadListener> firstLoadListeners = null;
+    private transient List<ItemUpdateListener> itemUpdateListeners;
+    private transient List<FirstLoadListener> firstLoadListeners;
 
 
     public VelovData() {
@@ -57,6 +59,7 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
     }
     public void set(int index, VelovStationData item) {
         stations.set(index, item);
+        notifyItemsUpdated();
     }
 
     public List<VelovStationData> getStations() {
@@ -98,7 +101,69 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         return nearest;
     }
 
+    public void load(@NonNull Context context, VelovRequest.OnTaskCompleted onTaskCompleted) {
+        if (InternetUtils.isNetworkAvailable(context)) {
+            VelovRequest req = new VelovRequest(context, "Lyon", onTaskCompleted);
+            req.execute(this);
+        } else {
+            Toast.makeText(context, R.string.toast_loadSavedData , Toast.LENGTH_SHORT)
+                    .show();
+            loadFromSave(context);
+        }
+    }
 
+    private void loadFromSave(@NonNull Context context) {
+        InputStream in;
+        ObjectInputStream ois;
+        VelovData savedData = null;
+
+        try {
+            in = context.openFileInput(SAVE_FILE);
+            ois = new ObjectInputStream(in);
+
+            savedData = (VelovData) ois.readObject();
+
+            ois.close();
+        } catch (IOException |ClassNotFoundException e) {
+            Log.e(TAG, "loadFromSave: " + e.getMessage(), e);
+        }
+
+        if (savedData != null) {
+            this.setAll(savedData.getStations());
+        }
+    }
+
+    public void save(@NonNull Context context) {
+        OutputStream out;
+        ObjectOutputStream oos;
+
+        try {
+            out = context.openFileOutput(SAVE_FILE, Context.MODE_PRIVATE);
+            oos = new ObjectOutputStream(out);
+
+            oos.writeObject(this);
+
+            oos.close();
+        } catch (IOException e) {
+            Log.e(TAG, "onStop: " + e.getMessage(), e);
+        }
+    }
+
+    public void processFavorites(@NonNull Context context) {
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                context.getString(R.string.sharedPrefFile),
+                Context.MODE_PRIVATE);
+
+        HashSet<String> favoritesString = (HashSet<String>) sharedPref.getStringSet(
+                context.getString(R.string.sharedPrefFavorites),
+                new HashSet<>());
+
+        for (VelovStationData station : this.stations) {
+            station.setFavorite(
+                    favoritesString.contains(String.valueOf(station.getNumber()))
+            );
+        }
+    }
 
     public void addOnItemsUpdateListener(ItemUpdateListener listener) {
         this.itemUpdateListeners.add(listener);
@@ -189,35 +254,23 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
     }
 
     public void sort(Comparator<VelovStationData> c){
-        /*
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Log.i("XTK", "On a le droit de sort !!!!");
-            //stations.sort(Comparator.comparing(VelovStationData::isFavorite).reversed().thenComparing(VelovStationData::getName));
-            //TODO: BUg a corriger voir avec enzo
-
-        }
-        */
-
         Collections.sort(stations, (o1, o2) -> {
-            if(o1.isFavorite()){
-                if(!o2.isFavorite()){
+            if (o1.isFavorite()) {
+                if (!o2.isFavorite()) {
                     return -1;
                 }
             } else {
-                if(o2.isFavorite()){
+                if (o2.isFavorite()) {
                     return 1;
                 }
             }
-            if(c == null){
+
+            if (c == null) {
                 return 0;
             }
-
-            return c.compare(o1,o2);
-
-
-        } );
+            return c.compare(o1, o2);
+        });
     }
-
 
     @NonNull
     @Override
@@ -231,58 +284,4 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
                 "stations=" + stations +
                 '}';
     }
-
-    public void save(Context context){
-        OutputStream out;
-        ObjectOutputStream oos;
-
-        try {
-            out = context.openFileOutput(SAVE_FILE, Context.MODE_PRIVATE);
-            oos = new ObjectOutputStream(out);
-
-            oos.writeObject(this);
-
-            oos.close();
-        } catch (IOException e) {
-            Log.e(TAG, "save: " + e.getMessage(), e);
-        }
-    }
-    public void loadLastSave(Context context) {
-        InputStream in;
-        ObjectInputStream ois;
-        VelovData savedData = null;
-
-        try {
-            in = context.openFileInput(SAVE_FILE);
-            ois = new ObjectInputStream(in);
-
-            savedData = (VelovData) ois.readObject();
-
-            ois.close();
-        } catch (IOException|ClassNotFoundException e) {
-            Log.e(TAG, "loadLastSave: " + e.getMessage(), e);
-        }
-
-        Log.d(TAG, "loadLastSave: savedData=" + savedData);
-        if (savedData != null) {
-            this.setAll(savedData.getStations());
-        }
-    }
-
-    public void processFavorites(Context context){
-        if(context == null){
-            return;
-        }
-        SharedPreferences sharedPref = context.getSharedPreferences(context.getString(R.string.sharedPrefFile), Context.MODE_PRIVATE);
-        HashSet<String> favoritesString = (HashSet<String>) sharedPref.getStringSet(context.getString(R.string.sharedPrefFavorites), new HashSet<String>());
-        for (VelovStationData station : this) {
-            if(favoritesString.contains(String.valueOf(station.getNumber()))){
-                station.setFavorite(true);
-            } else {
-                station.setFavorite(false);
-            }
-        }
-    }
-
-
 }

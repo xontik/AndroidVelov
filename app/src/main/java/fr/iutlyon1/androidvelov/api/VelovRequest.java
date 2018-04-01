@@ -1,7 +1,6 @@
 package fr.iutlyon1.androidvelov.api;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -12,43 +11,36 @@ import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashSet;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import fr.iutlyon1.androidvelov.R;
+import fr.iutlyon1.androidvelov.Props;
 import fr.iutlyon1.androidvelov.model.VelovData;
-import fr.iutlyon1.androidvelov.model.VelovStationData;
 import fr.iutlyon1.androidvelov.utils.InternetUtils;
 
 public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
-    public interface OnTaskCompleted{
-        void onTaskCompleted();
+    public interface OnTaskCompleted {
+        void onTaskCompleted(VelovData fetched);
     }
 
+    private static final String TAG = "VelovRequest";
     private static final String API_URL = "https://api.jcdecaux.com/vls/v1/stations";
 
-    private WeakReference<Context> context = null;
+    private WeakReference<Context> context;
     private final String contract;
     private final String apiKey;
     private OnTaskCompleted listener;
 
     private VelovData[] datas = null;
 
-    public VelovRequest(Context context, String contract, String apiKey, OnTaskCompleted listener) {
+    public VelovRequest(Context context, String contract, OnTaskCompleted listener) {
+        this.apiKey = Props.getInstance(context).get("API_KEY");
+
         this.context = new WeakReference<>(context);
         this.contract = contract;
-        this.apiKey = apiKey;
         this.listener = listener;
     }
-    public VelovRequest(Context context, String contract, String apiKey) {
-        this.context = new WeakReference<>(context);
-        this.contract = contract;
-        this.apiKey = apiKey;
-        this.listener = null;
-    }
-
+    
     @Override
     protected VelovData doInBackground(VelovData... datas) {
         this.datas = datas;
@@ -83,7 +75,7 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
                 urlConnection.disconnect();
             }
 
-            e.printStackTrace();
+            Log.e(TAG, "doInBackground: " + e.getMessage(), e);
         }
 
         return velovData;
@@ -91,7 +83,6 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
 
     @Override
     protected void onPostExecute(VelovData velovData) {
-
         if (velovData == null) {
             Context context = this.context.get();
             if (context != null) {
@@ -105,11 +96,10 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
         for (VelovData data : this.datas) {
             data.setAll(velovData.getStations());
         }
-        if(listener != null) {
-            listener.onTaskCompleted();
+
+        if (listener != null) {
+            listener.onTaskCompleted(velovData);
         }
-
-
     }
 
     private URL buildURL(String url, String... parameters) {
@@ -138,6 +128,4 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
         }
 
     }
-
-
 }

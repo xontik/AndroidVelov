@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -5,7 +6,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="fr.iutlyon1.androidvelov.StationMapActivity">
+    tools:context=".StationMapFragment">
 
     <fragment
         android:id="@+id/map"
@@ -46,7 +47,7 @@
         android:layout_marginTop="8dp"
         android:background="@android:color/transparent"
         android:contentDescription="@string/content_descr_delete_text"
-        android:src="@drawable/ic_backspace_black_24dp"
+        android:src="@drawable/ic_close_grey_24dp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/search"
         app:layout_constraintEnd_toEndOf="@+id/search"

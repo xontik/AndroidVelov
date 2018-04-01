@@ -1,59 +1,69 @@
 package fr.iutlyon1.androidvelov;
 
-import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.webkit.WebView;
+import android.os.Bundle;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-import java.util.Locale;
+import com.google.android.gms.maps.model.LatLng;
+
+import java.text.DateFormat;
 
 import fr.iutlyon1.androidvelov.model.VelovStationData;
 
 public class StationDetailActivity extends AppCompatActivity {
-
-    private WebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_station_detail);
 
-        VelovStationData d = (VelovStationData) getIntent().getSerializableExtra("station");
-        String data = String.format(Locale.FRANCE, "<!DOCTYPE html>\n" +
-                        "<html>\n" +
-                        "    <body>\n" +
-                        "        <h1>%s#%d</h1>\n" +
-                        "        <ul>\n" +
-                        "            <li><strong>Emplacement : </strong>%s</li>\n" +
-                        "            <li><strong>Latitude : </strong>%f</li>\n" +
-                        "            <li><strong>Longitude : </strong>%f</li>\n" +
-                        "            <li><strong>Moyen de paiment :</strong>%s</li>\n" +
-                        "            <li><strong>Bonus : </strong>%s</li>\n" +
-                        "            <li><strong>Etat : </strong>%s</li>\n" +
-                        "            <li><strong>Ville : </strong>%s</li>\n" +
-                        "            <li><strong>Nombre d'empalcements : </strong>%s</li>\n" +
-                        "            <li><strong>Vélos disponibles : </strong>%s</li>\n" +
-                        "            <li><strong>Emplacements disponibles : </strong>%s</li>\n" +
-                        "        </ul>\n" +
-                        "    </body>\n" +
-                        "</html>",
-                d.getName(),
-                d.getNumber(),
-                d.getAddress(),
-                d.getPosition().latitude,
-                d.getPosition().longitude,
-                d.isBanking(),
-                d.isBonus(),
-                d.getStatus(),
-                d.getContractName(),
-                d.getBikeStands(),
-                d.getAvailableBikes(),
-                d.getAvailableBikeStands());
+        VelovStationData station = (VelovStationData) getIntent().getSerializableExtra("station");
+        if (station == null)
+            throw new IllegalArgumentException("Need a station !");
 
-        webView = findViewById(R.id.webView);
-
-        webView.loadData(data, "text/html", "UTF-8");
-
+        show(station);
     }
 
+    private void show(VelovStationData station) {
+        final ImageView favorite = findViewById(R.id.favoriteIcon);
+        favorite.setImageResource(station.isFavorite()
+                ? R.drawable.ic_favorite_black_24dp
+                : R.drawable.ic_favorite_border_black_24dp);
 
+        final TextView fullname = findViewById(R.id.fullname);
+        fullname.setText(station.getFullName());
+
+        final TextView address = findViewById(R.id.address);
+        address.setText(station.getAddress());
+
+        final TextView latitude = findViewById(R.id.latitude);
+        final TextView longitude = findViewById(R.id.longitude);
+        final LatLng pos = station.getPosition();
+        latitude.setText(String.valueOf(pos.latitude));
+        longitude.setText(String.valueOf(pos.longitude));
+
+        final TextView banking = findViewById(R.id.banking);
+        banking.setText(station.isBanking()
+                ? R.string.data_banking_true
+                : R.string.data_banking_false);
+
+        final TextView bonus = findViewById(R.id.bonus);
+        bonus.setText(station.isBonus()
+                ? R.string.data_bonus_true
+                : R.string.data_bonus_false);
+
+        final TextView bikeStands = findViewById(R.id.bikeStands);
+        bikeStands.setText(String.valueOf(station.getBikeStands()));
+
+        final TextView availableBikeStands = findViewById(R.id.availableBikeStands);
+        availableBikeStands.setText(String.valueOf(station.getAvailableBikeStands()));
+
+        final TextView availableBikes = findViewById(R.id.availableBikes);
+        availableBikes.setText(String.valueOf(station.getAvailableBikes()));
+
+        final TextView lastUpdate = findViewById(R.id.last_update);
+        final DateFormat formatter = android.text.format.DateFormat.getTimeFormat(getApplicationContext());
+        lastUpdate.setText(formatter.format(station.getLastUpdate()));
+    }
 }
