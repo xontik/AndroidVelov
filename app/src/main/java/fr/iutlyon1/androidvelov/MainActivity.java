@@ -12,8 +12,11 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -70,6 +73,33 @@ public class MainActivity extends AppCompatActivity
     protected void onStop() {
         mDataset.save(this);
         super.onStop();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_main_app_bar, menu);
+        final MenuItem searchItem = menu.findItem(R.id.action_search);
+
+        if (searchItem != null) {
+            SearchView searchView = (SearchView) searchItem.getActionView();
+
+            EditText searchPlate = searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+            searchPlate.setHint(R.string.station_map_search_hint);
+
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    // mDataset.filter(newText);
+                    return false;
+                }
+            });
+        }
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
