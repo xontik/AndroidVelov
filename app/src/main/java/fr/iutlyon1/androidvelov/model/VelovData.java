@@ -40,6 +40,7 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
     private static final String SAVE_FILE = "dataset.ser";
 
     private List<VelovStationData> stations;
+
     private transient boolean wasLoaded;
 
     private transient List<ItemUpdateListener> itemUpdateListeners;
@@ -57,7 +58,11 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
     public VelovStationData get(int index) {
         return stations.get(index);
     }
+
     public void set(int index, VelovStationData item) {
+        if (!wasLoaded) {
+            throw new IllegalStateException("Data aren't loaded");
+        }
         stations.set(index, item);
         notifyItemsUpdated();
     }
@@ -101,6 +106,20 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         return nearest;
     }
 
+    public void sort(Comparator<VelovStationData> comparator) {
+        Collections.sort(stations, (s1, s2) -> {
+            if (s1.isFavorite() != s2.isFavorite()) {
+                return s1.isFavorite() ? -1 : 1;
+            }
+
+            if (comparator != null) {
+                return comparator.compare(s1, s2);
+            }
+
+            return 0;
+        });
+    }
+
     public void load(@NonNull Context context, VelovRequest.OnTaskCompleted onTaskCompleted) {
         if (InternetUtils.isNetworkAvailable(context)) {
             VelovRequest req = new VelovRequest(context, "Lyon", onTaskCompleted);
@@ -124,7 +143,7 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
             savedData = (VelovData) ois.readObject();
 
             ois.close();
-        } catch (IOException |ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             Log.e(TAG, "loadFromSave: " + e.getMessage(), e);
         }
 
@@ -202,32 +221,6 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         return stations.isEmpty();
     }
 
-    public boolean contains(VelovStationData station) {
-        return stations.contains(station);
-    }
-
-    public boolean add(VelovStationData velovStationData) {
-        boolean wasAdded = stations.add(velovStationData);
-
-        if (!wasLoaded)
-            notifyFirstLoad();
-        if (wasAdded)
-            notifyItemsUpdated();
-
-        return wasAdded;
-    }
-
-    public boolean addAll(@NonNull Collection<? extends VelovStationData> c) {
-        boolean wasAdded = stations.addAll(c);
-
-        if (wasLoaded)
-            notifyFirstLoad();
-        if (wasAdded)
-            notifyItemsUpdated();
-
-        return wasAdded;
-    }
-
     public void setAll(@NonNull Collection<? extends VelovStationData> c) {
         this.stations.clear();
         this.stations.addAll(c);
@@ -235,41 +228,6 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         if (!wasLoaded)
             notifyFirstLoad();
         notifyItemsUpdated();
-    }
-
-    public boolean remove(VelovStationData station) {
-        boolean wasRemoved = stations.remove(station);
-        if (wasRemoved) {
-            notifyItemsUpdated();
-        }
-        return wasRemoved;
-    }
-
-    public boolean removeAll(@NonNull Collection<? extends VelovStationData> c) {
-        boolean wasRemoved = stations.removeAll(c);
-        if (wasRemoved) {
-            notifyItemsUpdated();
-        }
-        return wasRemoved;
-    }
-
-    public void sort(Comparator<VelovStationData> c){
-        Collections.sort(stations, (o1, o2) -> {
-            if (o1.isFavorite()) {
-                if (!o2.isFavorite()) {
-                    return -1;
-                }
-            } else {
-                if (o2.isFavorite()) {
-                    return 1;
-                }
-            }
-
-            if (c == null) {
-                return 0;
-            }
-            return c.compare(o1, o2);
-        });
     }
 
     @NonNull

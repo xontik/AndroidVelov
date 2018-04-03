@@ -91,6 +91,7 @@ public class StationListFragment extends Fragment {
             refreshLocation();
         });
 
+        refreshLocation();
         return swipeRefresh;
     }
 
@@ -115,9 +116,13 @@ public class StationListFragment extends Fragment {
                                                 s2.getPosition()
                                         );
 
-                                        return (int) (dist1 - dist2);
-                                    });
+                                        double diff = dist1 - dist2;
+                                        if (-1. < diff && diff < 1.) {
+                                            return diff > 0 ? 1 : -1;
+                                        }
 
+                                        return (int) diff;
+                                    });
                                 }
                             }
                     );

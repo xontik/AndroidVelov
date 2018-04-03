@@ -11,6 +11,8 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 
 import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
@@ -39,14 +41,16 @@ class VelovParser {
         final String documentString = read();
 
         final JSONArray document = new JSONArray(documentString);
-        final VelovData stationList = new VelovData();
+        final List<VelovStationData> stationList = new ArrayList<>();
 
         for (int i = 0, length = document.length(); i < length; i++) {
             VelovStationData station = parseStation(document.getJSONObject(i));
             stationList.add(station);
         }
 
-        return stationList;
+        final VelovData dataset = new VelovData();
+        dataset.setAll(stationList);
+        return dataset;
     }
 
     private VelovStationData parseStation(JSONObject object) {

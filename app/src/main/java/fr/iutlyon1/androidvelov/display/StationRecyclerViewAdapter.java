@@ -19,7 +19,6 @@ import fr.iutlyon1.androidvelov.model.VelovStationData;
  * specified {@link OnListFragmentInteractionListener}.
  */
 public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecyclerViewAdapter.ViewHolder> {
-
     private final VelovData mDataset;
     private final OnListFragmentInteractionListener mListener;
     private Comparator<VelovStationData> mComparator;
@@ -75,7 +74,7 @@ public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecy
     }
 
     public void setComparator(Comparator<VelovStationData> comparator) {
-        if (!mComparator.equals(comparator)) {
+        if (mComparator == null || !mComparator.equals(comparator)) {
             this.mComparator = comparator;
 
             if (comparator != null)

@@ -77,7 +77,6 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-        Log.d(TAG, "onViewCreated: mapFragment=" + mapFragment);
         mapFragment.getMapAsync(this);
 
         // Initialize search bar
@@ -109,28 +108,6 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
 
         return view;
     }
-
-    /*
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-
-    }
-    */
-
-    /*
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (view != null) {
-            ViewGroup parent = (ViewGroup) view.getParent();
-            if (parent != null) {
-                parent.removeAllViews();
-            }
-        }
-    }
-    */
 
     @Override
     public void onAttach(Context context) {
