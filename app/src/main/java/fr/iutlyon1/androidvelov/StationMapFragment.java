@@ -126,6 +126,7 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap map) {
         this.mMap = map;
+        map.getUiSettings().setMapToolbarEnabled(false);
 
         initClusterManager();
 
@@ -174,7 +175,7 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void updateGoogleMap() {
-        if (mMap != null && mClusterManager != null && !mDataset.isEmpty()) {
+        if (mMap != null && mClusterManager != null) {
             mClusterManager.clearItems();
             mClusterManager.addItems(mDataset.getStations());
         }
