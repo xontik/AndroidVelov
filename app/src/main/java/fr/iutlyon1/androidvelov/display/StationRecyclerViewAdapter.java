@@ -21,18 +21,12 @@ import fr.iutlyon1.androidvelov.model.VelovStationData;
 public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecyclerViewAdapter.ViewHolder> {
     private final VelovData mDataset;
     private final OnListFragmentInteractionListener mListener;
-    private Comparator<VelovStationData> mComparator;
 
     public StationRecyclerViewAdapter(VelovData dataset, OnListFragmentInteractionListener listener) {
         mDataset = dataset;
         mListener = listener;
-        mComparator = null;
 
-        mDataset.addOnItemsUpdateListener(d -> {
-            if (mComparator != null)
-                d.sort(mComparator);
-            notifyDataSetChanged();
-        });
+        mDataset.addOnItemsUpdateListener(d -> notifyDataSetChanged());
     }
 
     @Override
@@ -71,17 +65,6 @@ public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecy
     @Override
     public int getItemCount() {
         return mDataset.size();
-    }
-
-    public void setComparator(Comparator<VelovStationData> comparator) {
-        if (mComparator == null || !mComparator.equals(comparator)) {
-            this.mComparator = comparator;
-
-            if (comparator != null)
-                mDataset.sort(comparator);
-
-            notifyDataSetChanged();
-        }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity
 
                 @Override
                 public boolean onQueryTextChange(String newText) {
-                    // mDataset.filter(newText);
+                    mDataset.setFilter(newText);
                     return false;
                 }
             });

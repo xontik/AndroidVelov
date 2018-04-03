@@ -39,7 +39,9 @@ import fr.iutlyon1.androidvelov.utils.Property;
 import fr.iutlyon1.androidvelov.utils.TextWatcherAdapter;
 
 public class StationMapFragment extends Fragment implements OnMapReadyCallback {
-    private static final String TAG = "StationMapFragment";
+    public interface OnMapFragmentInteractionListener {
+        void onInfoWindowClick(VelovStationData station);
+    }
 
     private GoogleMap mMap = null;
     private AutoCompleteTextView mSearch;
@@ -75,6 +77,7 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
         }
 
         mDataset = (VelovData) args.getSerializable("dataset");
+        // TODO Set on filter update
     }
 
     @Nullable
@@ -282,9 +285,5 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
         public View getInfoContents(Marker marker) {
             return null;
         }
-    }
-
-    public interface OnMapFragmentInteractionListener {
-        void onInfoWindowClick(VelovStationData station);
     }
 }
