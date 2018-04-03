@@ -1,11 +1,13 @@
 package fr.iutlyon1.androidvelov;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,19 +21,22 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.List;
+import java.util.Locale;
 
 import fr.iutlyon1.androidvelov.display.VelovClusterRenderer;
 import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
+import fr.iutlyon1.androidvelov.utils.AnimUtils;
 import fr.iutlyon1.androidvelov.utils.LatLngUtils;
 import fr.iutlyon1.androidvelov.utils.MapUtils;
+import fr.iutlyon1.androidvelov.utils.Property;
 import fr.iutlyon1.androidvelov.utils.TextWatcherAdapter;
-import fr.iutlyon1.androidvelov.utils.ViewUtils;
 
 public class StationMapFragment extends Fragment implements OnMapReadyCallback {
     private static final String TAG = "StationMapFragment";
@@ -39,13 +44,16 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap mMap = null;
     private AutoCompleteTextView mSearch;
     private ImageButton mSearchEmpty;
+    private FloatingActionButton mGotoStation;
 
     private ClusterManager<VelovStationData> mClusterManager = null;
 
     private OnMapFragmentInteractionListener mListener;
     private VelovData mDataset;
+    private Property<VelovStationData> selectedStation;
 
     public StationMapFragment() {
+        selectedStation = new Property<>();
     }
 
     public static StationMapFragment newInstance(VelovData dataset) {
@@ -88,7 +96,12 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
             public void afterTextChanged(Editable s) {
                 String searchString = s.toString();
 
-                ViewUtils.animateVisibility(mSearchEmpty, !searchString.isEmpty());
+                if (searchString.isEmpty()) {
+                    AnimUtils.fadeOut(mSearchEmpty);
+                } else {
+                    AnimUtils.fadeIn(mSearchEmpty);
+                }
+
                 if (mClusterManager == null)
                     return;
 
@@ -96,15 +109,44 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
                 mClusterManager.clearItems();
                 mClusterManager.addItems(filteredStationList);
 
-                if (filteredStationList.size() != 0) {
+                if (!filteredStationList.isEmpty()) {
                     LatLngBounds bounds = LatLngUtils.computeBounds(filteredStationList);
                     mMap.animateCamera(
                             CameraUpdateFactory.newLatLngBounds(bounds, MapUtils.MAP_PADDING));
+
+                    if (filteredStationList.size() == 1) {
+                        selectedStation.set(filteredStationList.get(0));
+                    }
                 }
             }
         });
 
         mSearchEmpty.setOnClickListener(v -> mSearch.setText(""));
+
+        // Initialize goto fab
+        mGotoStation = view.findViewById(R.id.goto_station);
+        mGotoStation.setOnClickListener(v -> {
+            if (selectedStation.isNull())
+                return;
+
+            final String uriFormat = "google.navigation:q=%f,%f&mode=b";
+            LatLng position = selectedStation.get().getPosition();
+
+            Uri uri = Uri.parse(String.format(Locale.ENGLISH, uriFormat, position.latitude, position.longitude));
+
+            Intent mapIntent = new Intent(Intent.ACTION_VIEW, uri);
+            mapIntent.setPackage("com.google.android.apps.maps");
+
+            startActivity(mapIntent);
+        });
+
+        // Listners
+        selectedStation.addOnChangeListener((old, nu) -> {
+            if (nu != null)
+                AnimUtils.slideIn(mGotoStation);
+            else
+                AnimUtils.slideOut(mGotoStation);
+        });
 
         return view;
     }
@@ -126,8 +168,8 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap map) {
         this.mMap = map;
-        map.getUiSettings().setMapToolbarEnabled(false);
 
+        initGoogleMap();
         initClusterManager();
 
         mDataset.addOnFirstLoadListener((velovData) -> {
@@ -144,7 +186,10 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    private VelovStationData selectedStation = null;
+    private void initGoogleMap() {
+        mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.setOnMapClickListener(latLng -> selectedStation.set(null));
+    }
 
     private void initClusterManager() {
         Context context = getContext();
@@ -152,17 +197,17 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
 
         mClusterManager.setRenderer(new VelovClusterRenderer(context, mMap, mClusterManager));
         mClusterManager.setOnClusterItemClickListener(station -> {
-            selectedStation = station;
+            selectedStation.set(station);
             return false;
         });
         mClusterManager.setOnClusterClickListener(cluster -> {
-            selectedStation = null;
+            selectedStation.set(null);
             return false;
         });
 
         mClusterManager.setOnClusterItemInfoWindowClickListener(velovStationData -> {
-            if (selectedStation != null && mListener != null) {
-                mListener.onInfoWindowClick(selectedStation);
+            if (!selectedStation.isNull() && mListener != null) {
+                mListener.onInfoWindowClick(selectedStation.get());
             }
         });
 
@@ -206,7 +251,8 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
 
         @Override
         public View getInfoWindow(Marker marker) {
-            if (selectedStation == null)
+            final VelovStationData station = selectedStation.get();
+            if (station == null)
                 return null;
 
             view.setBackground(getContext().getDrawable(R.drawable.window_info_background));
@@ -218,16 +264,16 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
             final ImageView standIcon = view.findViewById(R.id.standIcon);
             final TextView availableStands = view.findViewById(R.id.stationAvailableBikeStands);
 
-            favorite.setImageResource(selectedStation.isFavorite()
+            favorite.setImageResource(station.isFavorite()
                 ? R.drawable.ic_favorite_black_24dp
                 : R.drawable.ic_favorite_border_black_24dp);
-            name.setText(selectedStation.getFullName());
+            name.setText(station.getFullName());
 
             bikeIcon.setImageResource(R.drawable.ic_directions_bike_black_24dp);
-            availableBikes.setText(String.valueOf(selectedStation.getAvailableBikes()));
+            availableBikes.setText(String.valueOf(station.getAvailableBikes()));
 
             standIcon.setImageResource(R.drawable.ic_local_parking_black_24dp);
-            availableStands.setText(String.valueOf(selectedStation.getAvailableBikeStands()));
+            availableStands.setText(String.valueOf(station.getAvailableBikeStands()));
 
             return view;
         }
