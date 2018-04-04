@@ -75,6 +75,7 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         }
 
         mStations.set(index, item);
+        notifyItemsUpdated();
     }
 
     public List<VelovStationData> getStations() {
@@ -232,6 +233,7 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         for (ItemUpdateListener listener : itemUpdateListeners) {
             listener.onItemUpdate(this);
         }
+        notifyFilterUpdate();
     }
 
     private void notifyFilterUpdate() {

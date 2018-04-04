@@ -7,13 +7,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -36,7 +32,6 @@ import fr.iutlyon1.androidvelov.utils.AnimUtils;
 import fr.iutlyon1.androidvelov.utils.LatLngUtils;
 import fr.iutlyon1.androidvelov.utils.MapUtils;
 import fr.iutlyon1.androidvelov.utils.Property;
-import fr.iutlyon1.androidvelov.utils.TextWatcherAdapter;
 
 public class StationMapFragment extends Fragment implements OnMapReadyCallback {
     public interface OnMapFragmentInteractionListener {
@@ -44,11 +39,8 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private GoogleMap mMap = null;
-    private AutoCompleteTextView mSearch;
-    private ImageButton mSearchEmpty;
-    private FloatingActionButton mGotoStation;
-
     private ClusterManager<VelovStationData> mClusterManager = null;
+    private FloatingActionButton mGotoStation;
 
     private OnMapFragmentInteractionListener mListener;
     private VelovData mDataset;
@@ -77,7 +69,6 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
         }
 
         mDataset = (VelovData) args.getSerializable("dataset");
-        // TODO Set on filter update
     }
 
     @Nullable
@@ -89,42 +80,6 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        // Initialize search bar
-        mSearch = view.findViewById(R.id.search);
-        mSearchEmpty = view.findViewById(R.id.search_empty);
-
-        mSearch.addTextChangedListener(new TextWatcherAdapter() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                String searchString = s.toString();
-
-                if (searchString.isEmpty()) {
-                    AnimUtils.fadeOut(mSearchEmpty);
-                } else {
-                    AnimUtils.fadeIn(mSearchEmpty);
-                }
-
-                if (mClusterManager == null)
-                    return;
-
-                List<VelovStationData> filteredStationList = mDataset.find(searchString);
-                mClusterManager.clearItems();
-                mClusterManager.addItems(filteredStationList);
-
-                if (!filteredStationList.isEmpty()) {
-                    LatLngBounds bounds = LatLngUtils.computeBounds(filteredStationList);
-                    mMap.animateCamera(
-                            CameraUpdateFactory.newLatLngBounds(bounds, MapUtils.MAP_PADDING));
-
-                    if (filteredStationList.size() == 1) {
-                        selectedStation.set(filteredStationList.get(0));
-                    }
-                }
-            }
-        });
-
-        mSearchEmpty.setOnClickListener(v -> mSearch.setText(""));
 
         // Initialize goto fab
         mGotoStation = view.findViewById(R.id.goto_station);
@@ -182,10 +137,8 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
                         CameraUpdateFactory.newLatLngBounds(bounds, MapUtils.MAP_PADDING));
             }
 
-            velovData.addOnItemsUpdateListener(d -> {
-                updateGoogleMap();
-                updateSearchBar();
-            });
+            velovData.addOnFilterUpdateListener((filter, filteredStations, dataset)
+                    -> updateGoogleMap(filteredStations));
         });
     }
 
@@ -222,26 +175,23 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
         mMap.setInfoWindowAdapter(mClusterManager.getMarkerManager());
     }
 
-    private void updateGoogleMap() {
+    private void updateGoogleMap(List<VelovStationData> stations) {
         if (mMap != null && mClusterManager != null) {
             mClusterManager.clearItems();
             mClusterManager.addItems(mDataset.getStations());
-        }
-    }
 
-    private void updateSearchBar() {
-        String[] names = new String[mDataset.size()];
-        for (int i = 0, length = mDataset.size(); i < length; i++) {
-            names[i] = mDataset.get(i).getFullName();
-        }
+            mClusterManager.clearItems();
+            mClusterManager.addItems(stations);
 
-        Context context = getContext();
-        if (context != null) {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                    getContext(),
-                    android.R.layout.simple_list_item_1,
-                    names);
-            mSearch.setAdapter(adapter);
+            if (!stations.isEmpty()) {
+                LatLngBounds bounds = LatLngUtils.computeBounds(stations);
+                mMap.animateCamera(
+                        CameraUpdateFactory.newLatLngBounds(bounds, MapUtils.MAP_PADDING));
+
+                selectedStation.set(stations.size() == 1 ?
+                    stations.get(0)
+                    : null);
+            }
         }
     }
 

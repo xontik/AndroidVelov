@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.Comparator;
+import java.util.List;
 
 import fr.iutlyon1.androidvelov.R;
 import fr.iutlyon1.androidvelov.StationListFragment.OnListFragmentInteractionListener;
@@ -19,14 +19,17 @@ import fr.iutlyon1.androidvelov.model.VelovStationData;
  * specified {@link OnListFragmentInteractionListener}.
  */
 public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecyclerViewAdapter.ViewHolder> {
-    private final VelovData mDataset;
+    private List<VelovStationData> mDataset;
     private final OnListFragmentInteractionListener mListener;
 
     public StationRecyclerViewAdapter(VelovData dataset, OnListFragmentInteractionListener listener) {
-        mDataset = dataset;
+        mDataset = dataset.getStations();
         mListener = listener;
 
-        mDataset.addOnItemsUpdateListener(d -> notifyDataSetChanged());
+        dataset.addOnFilterUpdateListener((filter, filteredStations, ds) -> {
+            mDataset = filteredStations;
+            notifyDataSetChanged();
+        });
     }
 
     @Override
