@@ -5,7 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".StationDetailActivity">
+    tools:context=".StationDetailActivity"
+    tools:ignore="AndroidLintHardcodedText">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -30,7 +31,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:src="@drawable/ic_favorite_border_black_24dp"
-        android:contentDescription="@string/content_descr_favorite_icon"
+        android:contentDescription="@string/content_descr_favorite"
         app:layout_constraintBottom_toBottomOf="@+id/fullname"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/fullname" />

@@ -10,6 +10,7 @@
 
     <!-- MAIN ACTIVITY -->
     <string name="title_activity_main">MainActivity</string>
+    <string name="search">Recherche</string>
 
     <!-- MAP FRAGMENT -->
     <string name="title_fragment_station_map">Carte</string>

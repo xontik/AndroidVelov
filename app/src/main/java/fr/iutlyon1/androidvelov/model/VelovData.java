@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import fr.iutlyon1.androidvelov.R;
@@ -28,59 +29,69 @@ import fr.iutlyon1.androidvelov.utils.InternetUtils;
 import fr.iutlyon1.androidvelov.utils.LatLngUtils;
 
 public class VelovData implements Iterable<VelovStationData>, Serializable {
-    public interface ItemUpdateListener {
-        void onItemUpdate(VelovData velovData);
+    public interface FirstLoadListener {
+        void onFirstLoad(VelovData dataset);
     }
 
-    public interface FirstLoadListener {
-        void onFirstLoad(VelovData velovData);
+    public interface ItemUpdateListener {
+        void onItemUpdate(VelovData dataset);
+    }
+
+    public interface FilterUpdateListener {
+        void onFilterUpdate(String filter, List<VelovStationData> filteredStations, VelovData dataset);
     }
 
     private static final String TAG = "VelovData";
     private static final String SAVE_FILE = "dataset.ser";
 
-    private List<VelovStationData> stations;
+    private List<VelovStationData> mStations;
 
+    private transient String mFilter;
+    private transient Comparator<VelovStationData> mComparator = null;
     private transient boolean wasLoaded;
 
-    private transient List<ItemUpdateListener> itemUpdateListeners;
     private transient List<FirstLoadListener> firstLoadListeners;
-
+    private transient List<ItemUpdateListener> itemUpdateListeners;
+    private transient List<FilterUpdateListener> filterUpdateListeners;
 
     public VelovData() {
-        this.stations = new ArrayList<>();
+        this.mStations = new ArrayList<>();
+        this.mFilter = null;
+
         this.wasLoaded = false;
 
-        this.itemUpdateListeners = new ArrayList<>();
-        this.firstLoadListeners = new ArrayList<>();
+        this.firstLoadListeners = new LinkedList<>();
+        this.itemUpdateListeners = new LinkedList<>();
+        this.filterUpdateListeners = new LinkedList<>();
     }
 
-    public VelovStationData get(int index) {
-        return stations.get(index);
+    public VelovStationData get(int index) throws IndexOutOfBoundsException {
+        return mStations.get(index);
     }
 
-    public void set(int index, VelovStationData item) {
+    public void set(int index, VelovStationData item) throws IndexOutOfBoundsException {
         if (!wasLoaded) {
             throw new IllegalStateException("Data aren't loaded");
         }
-        stations.set(index, item);
+
+        mStations.set(index, item);
         notifyItemsUpdated();
     }
 
     public List<VelovStationData> getStations() {
-        return stations;
+        return mStations;
     }
 
     public List<VelovStationData> find(String searchString) {
-        List<VelovStationData> stationList = new ArrayList<>();
+        List<VelovStationData> stations = new ArrayList<>();
 
-        for (VelovStationData station : stations) {
+        for (VelovStationData station : this.mStations) {
             if (station.matches(searchString)) {
-                stationList.add(station);
+                stations.add(station);
             }
         }
 
-        return stationList;
+        return stations;
     }
 
     public VelovStationData getNearest(LatLng position) {
@@ -88,7 +99,7 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
             return null;
         }
 
-        final Iterator<VelovStationData> it = stations.iterator();
+        final Iterator<VelovStationData> it = mStations.iterator();
 
         VelovStationData nearest = it.next();
         double nearestDistance = LatLngUtils.computeDistance(position, nearest.getPosition());
@@ -106,8 +117,8 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         return nearest;
     }
 
-    public void sort(Comparator<VelovStationData> comparator) {
-        Collections.sort(stations, (s1, s2) -> {
+    public void setComparator(Comparator<VelovStationData> comparator) {
+        mComparator = (s1, s2) -> {
             if (s1.isFavorite() != s2.isFavorite()) {
                 return s1.isFavorite() ? -1 : 1;
             }
@@ -117,7 +128,10 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
             }
 
             return 0;
-        });
+        };
+
+        Collections.sort(mStations, mComparator);
+        notifyItemsUpdated();
     }
 
     public void load(@NonNull Context context, VelovRequest.OnTaskCompleted onTaskCompleted) {
@@ -177,11 +191,18 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
                 context.getString(R.string.sharedPrefFavorites),
                 new HashSet<>());
 
-        for (VelovStationData station : this.stations) {
+        for (VelovStationData station : this.mStations) {
             station.setFavorite(
                     favoritesString.contains(String.valueOf(station.getNumber()))
             );
         }
+    }
+
+    public void addOnFirstLoadListener(FirstLoadListener listener) {
+        if (wasLoaded)
+            listener.onFirstLoad(this);
+        else
+            firstLoadListeners.add(listener);
     }
 
     public void addOnItemsUpdateListener(ItemUpdateListener listener) {
@@ -192,17 +213,12 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         this.itemUpdateListeners.remove(listener);
     }
 
-    public void addOnFirstLoadListener(FirstLoadListener listener) {
-        if (wasLoaded)
-            listener.onFirstLoad(this);
-        else
-            firstLoadListeners.add(listener);
+    public void addOnFilterUpdateListener(FilterUpdateListener listener) {
+        this.filterUpdateListeners.add(listener);
     }
 
-    private void notifyItemsUpdated() {
-        for (ItemUpdateListener listener : itemUpdateListeners) {
-            listener.onItemUpdate(this);
-        }
+    public void removeOnFilterUpdateListener(FilterUpdateListener listener) {
+        this.filterUpdateListeners.remove(listener);
     }
 
     private void notifyFirstLoad() {
@@ -213,17 +229,45 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         firstLoadListeners.clear();
     }
 
+    private void notifyItemsUpdated() {
+        for (ItemUpdateListener listener : itemUpdateListeners) {
+            listener.onItemUpdate(this);
+        }
+        notifyFilterUpdate();
+    }
+
+    private void notifyFilterUpdate() {
+        List<VelovStationData> filtered = find(mFilter);
+
+        for (FilterUpdateListener listener : filterUpdateListeners) {
+            listener.onFilterUpdate(mFilter, filtered, this);
+        }
+    }
+
+    public void setFilter(String filter) {
+        mFilter = filter;
+        notifyFilterUpdate();
+    }
+
+    public String getFilter() {
+        return mFilter;
+    }
+
     public int size() {
-        return stations.size();
+        return mStations.size();
     }
 
     public boolean isEmpty() {
-        return stations.isEmpty();
+        return mStations.isEmpty();
     }
 
     public void setAll(@NonNull Collection<? extends VelovStationData> c) {
-        this.stations.clear();
-        this.stations.addAll(c);
+        this.mStations.clear();
+        this.mStations.addAll(c);
+
+        if (mComparator != null) {
+            Collections.sort(mStations, mComparator);
+        }
 
         if (!wasLoaded)
             notifyFirstLoad();
@@ -233,13 +277,13 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
     @NonNull
     @Override
     public Iterator<VelovStationData> iterator() {
-        return stations.iterator();
+        return mStations.iterator();
     }
 
     @Override
     public String toString() {
         return "VelovData{" +
-                "stations=" + stations +
+                "stations=" + mStations +
                 '}';
     }
 }

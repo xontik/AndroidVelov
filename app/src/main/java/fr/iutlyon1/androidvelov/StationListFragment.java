@@ -32,8 +32,12 @@ import fr.iutlyon1.androidvelov.utils.LatLngUtils;
  * interface.
  */
 public class StationListFragment extends Fragment {
+    public interface OnListFragmentInteractionListener {
+        void onListFragmentClick(int position, VelovStationData station);
+        boolean onListFragmentLongClick(int position, VelovStationData station);
+    }
+
     private OnListFragmentInteractionListener mListener;
-    private StationRecyclerViewAdapter mAdapter;
 
     private FusedLocationProviderClient mFusedLocationClient;
     private VelovData mDataset;
@@ -80,7 +84,7 @@ public class StationListFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.addItemDecoration(new DividerItemDecoration(context, LinearLayoutManager.VERTICAL));
 
-        mAdapter = new StationRecyclerViewAdapter(mDataset, mListener);
+        StationRecyclerViewAdapter mAdapter = new StationRecyclerViewAdapter(mDataset, mListener);
         recyclerView.setAdapter(mAdapter);
 
         swipeRefresh.setOnRefreshListener(() -> {
@@ -97,7 +101,7 @@ public class StationListFragment extends Fragment {
 
     private void refreshLocation() {
         if (!checkLocationPermission()) {
-            mAdapter.setComparator((s1, s2) -> s1.getName().compareToIgnoreCase(s2.getName()));
+            mDataset.setComparator((s1, s2) -> s1.getName().compareToIgnoreCase(s2.getName()));
         } else {
             mFusedLocationClient.getLastLocation()
                     .addOnSuccessListener(
@@ -106,7 +110,7 @@ public class StationListFragment extends Fragment {
                                 // Got last known location. In some rare situations this can be null.
                                 if (location != null) {
                                     LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                                    mAdapter.setComparator((s1, s2) -> {
+                                    mDataset.setComparator((s1, s2) -> {
                                         double dist1 = LatLngUtils.computeDistance(
                                                 currentLatLng,
                                                 s1.getPosition()
@@ -117,7 +121,7 @@ public class StationListFragment extends Fragment {
                                         );
 
                                         double diff = dist1 - dist2;
-                                        if (-1. < diff && diff < 1.) {
+                                        if (-1. < diff && diff != 0 && diff < 1.) {
                                             return diff > 0 ? 1 : -1;
                                         }
 
@@ -184,10 +188,5 @@ public class StationListFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    public interface OnListFragmentInteractionListener {
-        void onListFragmentClick(int position, VelovStationData station);
-        boolean onListFragmentLongClick(int position, VelovStationData station);
     }
 }

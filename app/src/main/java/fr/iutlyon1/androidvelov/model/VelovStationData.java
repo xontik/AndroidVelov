@@ -44,6 +44,9 @@ public class VelovStationData implements Serializable, ClusterItem {
     }
 
     public boolean matches(String searchString) {
+        if (searchString == null)
+            return true;
+
         final String fullname = this.getFullName().toUpperCase();
         searchString = searchString.toUpperCase();
 
