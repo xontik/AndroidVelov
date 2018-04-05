@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity
             StationMapFragment.OnMapFragmentInteractionListener {
 
     private DrawerLayout drawer;
+    private NavigationView mNavigationView;
     private SearchView mSearchView;
 
     private StationMapFragment fragmentMap = null;
@@ -76,8 +77,8 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        mNavigationView = findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
 
         mDataset = (VelovData) getIntent().getSerializableExtra("dataset");
         if (mDataset == null) {
@@ -282,12 +283,16 @@ public class MainActivity extends AppCompatActivity
     private void showFragmentMap() {
         if (this.fragmentMap == null)
             this.fragmentMap = StationMapFragment.newInstance(mDataset);
+
+        mNavigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
         this.startTransactionFragment(this.fragmentMap);
     }
 
     private void showFragmentList() {
         if (this.fragmentList == null)
             this.fragmentList = StationListFragment.newInstance(mDataset);
+
+        mNavigationView.getMenu().findItem(R.id.nav_list).setChecked(true);
         this.startTransactionFragment(this.fragmentList);
     }
 

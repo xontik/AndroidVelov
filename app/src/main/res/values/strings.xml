@@ -4,8 +4,6 @@
     <!-- NAV DRAWER -->
     <string name="navigation_drawer_open">Ouvrir le navigation drawer</string>
     <string name="navigation_drawer_close">Fermer le navigation drawer</string>
-    <string name="nav_header_title">AndroidVelov</string>
-    <string name="nav_header_subtitle">Sous-titre</string>
     <string name="nav_header_desc">En-tête de navigation</string>
 
     <!-- MAIN ACTIVITY -->
