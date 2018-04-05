@@ -18,8 +18,14 @@ public class VelovClusterRenderer extends DefaultClusterRenderer<VelovStationDat
 
     @Override
     protected void onBeforeClusterItemRendered(VelovStationData item, MarkerOptions markerOptions) {
-        if (item.getAvailableBikeStands() == 0) {
+
+
+        if (item.getAvailableBikes() > 0 && item.getAvailableBikeStands() > 0) {
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        } else if (item.getAvailableBikeStands() == 0) {
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+        } else {
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
         }
 
         super.onBeforeClusterItemRendered(item, markerOptions);
