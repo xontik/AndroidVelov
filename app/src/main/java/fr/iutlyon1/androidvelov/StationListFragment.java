@@ -77,7 +77,8 @@ public class StationListFragment extends Fragment {
         swipeRefresh.setOnRefreshListener(() ->
                 mDataset.load(
                         context,
-                        (dataset) -> swipeRefresh.setRefreshing(false)
+                        (dataset) -> swipeRefresh.setRefreshing(false),
+                        true
                 )
         );
 

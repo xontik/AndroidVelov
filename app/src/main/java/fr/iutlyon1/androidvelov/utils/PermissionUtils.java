@@ -10,10 +10,10 @@ import android.support.v7.app.AlertDialog;
 import fr.iutlyon1.androidvelov.R;
 
 public class PermissionUtils {
-    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
-
     private PermissionUtils() {
     }
+
+    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
     public static boolean checkLocationPermission(Activity activity) {
         if (ContextCompat.checkSelfPermission(

@@ -321,6 +321,7 @@ public class MainActivity extends AppCompatActivity
             VelovStationData station = (VelovStationData) data.getSerializableExtra("station");
             EditText searchPlate = mSearchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
 
+            mSearchView.setIconified(true);
             showFragmentMap();
             searchPlate.setText(station.getFullName());
         }

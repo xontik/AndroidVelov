@@ -9,24 +9,6 @@ import fr.iutlyon1.androidvelov.R;
 public final class AnimUtils {
     private AnimUtils() {}
 
-    public static void fadeIn(View view) {
-        if (view.getVisibility() == View.VISIBLE)
-            return;
-
-        Animation fadeIn = AnimationUtils.loadAnimation(view.getContext(), R.anim.fade_in);
-        view.startAnimation(fadeIn);
-        view.setVisibility(View.VISIBLE);
-    }
-
-    public static void fadeOut(View view) {
-        if (view.getVisibility() == View.INVISIBLE)
-            return;
-
-        Animation fadeOut = AnimationUtils.loadAnimation(view.getContext(), R.anim.fade_out);
-        view.startAnimation(fadeOut);
-        view.setVisibility(View.INVISIBLE);
-    }
-
     public static void slideIn(View view) {
         if (view.getVisibility() == View.VISIBLE)
             return;
