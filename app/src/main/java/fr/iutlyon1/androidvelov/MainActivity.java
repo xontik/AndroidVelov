@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity
     private VelovData mDataset;
 
     public MainActivity() {
-        mDataset = new VelovData();
     }
 
     @Override
@@ -64,6 +63,11 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        mDataset = (VelovData) getIntent().getSerializableExtra("dataset");
+        if (mDataset == null) {
+            throw new IllegalArgumentException("Need a dataset !");
+        }
 
         showFragmentMap();
     }
