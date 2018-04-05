@@ -103,7 +103,10 @@ public class MainActivity extends AppCompatActivity
                             this,
                             location -> {
                                 if (fragmentMap != null && location != null)
-                                    fragmentMap.centerOn(location);
+                                    fragmentMap.centerOn(new LatLng(
+                                            location.getLatitude(),
+                                            location.getLongitude()
+                                    ));
                             });
         }
     }
@@ -297,10 +300,24 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private static final int REQUEST_SHOW_IN_MAP = 1;
+
     private void showStationDetails(VelovStationData station) {
         Intent intent = new Intent(MainActivity.this, StationDetailActivity.class);
         intent.putExtra("station", station);
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_SHOW_IN_MAP);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_SHOW_IN_MAP && resultCode == RESULT_OK) {
+            VelovStationData station = (VelovStationData) data.getSerializableExtra("station");
+
+            showFragmentMap();
+            fragmentMap.highlight(station);
+        }
     }
 
     @Override

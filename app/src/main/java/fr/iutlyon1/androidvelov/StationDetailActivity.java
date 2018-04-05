@@ -1,6 +1,9 @@
 package fr.iutlyon1.androidvelov;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -16,6 +19,9 @@ import fr.iutlyon1.androidvelov.model.VelovStationData;
 
 public class StationDetailActivity extends AppCompatActivity {
 
+    private VelovStationData station;
+
+    @SuppressWarnings("ConstantConditions")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,7 +32,10 @@ public class StationDetailActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-        VelovStationData station = (VelovStationData) getIntent().getSerializableExtra("station");
+        FloatingActionButton fab = findViewById(R.id.floatingActionButton);
+        fab.setOnClickListener(v -> showStationOnMap());
+
+        station = (VelovStationData) getIntent().getSerializableExtra("station");
         if (station == null)
             throw new IllegalArgumentException("Need a station !");
 
@@ -44,11 +53,18 @@ public class StationDetailActivity extends AppCompatActivity {
         return true;
     }
 
-    private void show(VelovStationData station) {
+    private void showStationOnMap() {
+        Intent intent = new Intent();
+        intent.putExtra("station", station);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
+
+    private void show(@NonNull VelovStationData station) {
         final ImageView favorite = findViewById(R.id.favoriteIcon);
-        favorite.setImageResource(station.isFavorite()
-                ? R.drawable.ic_favorite_black_24dp
-                : R.drawable.ic_favorite_border_black_24dp);
+        favorite.setImageResource(station.isFavorite() ?
+                R.drawable.ic_favorite_black_36dp
+                : R.drawable.ic_favorite_border_black_36dp);
 
         final TextView fullname = findViewById(R.id.fullname);
         fullname.setText(station.getFullName());

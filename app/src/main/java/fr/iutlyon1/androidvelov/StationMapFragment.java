@@ -2,7 +2,6 @@ package fr.iutlyon1.androidvelov;
 
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -174,11 +173,14 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
 
     private final static float DEFAULT_ZOOM = 16.5f;
 
-    public void centerOn(@NonNull Location location) {
-        if (mMap != null) {
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+    public void highlight(@NonNull VelovStationData station) {
+        selectedStation.set(station);
+        centerOn(station.getPosition());
+    }
 
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
+    public void centerOn(@NonNull LatLng location) {
+        if (mMap != null) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
         }
     }
 
@@ -188,9 +190,11 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
             mClusterManager.addItems(stations);
             mClusterManager.cluster();
 
-            selectedStation.set(stations.size() == 1 ?
-                stations.get(0)
-                : null);
+            if (stations.size() == 1) {
+                highlight(stations.get(0));
+            } else {
+                selectedStation.set(null);
+            }
         }
     }
 
