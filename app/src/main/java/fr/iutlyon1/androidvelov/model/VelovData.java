@@ -6,8 +6,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -26,7 +24,6 @@ import java.util.List;
 import fr.iutlyon1.androidvelov.R;
 import fr.iutlyon1.androidvelov.api.VelovRequest;
 import fr.iutlyon1.androidvelov.utils.InternetUtils;
-import fr.iutlyon1.androidvelov.utils.LatLngUtils;
 
 public class VelovData implements Iterable<VelovStationData>, Serializable {
     public interface FirstLoadListener {
@@ -92,29 +89,6 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         }
 
         return stations;
-    }
-
-    public VelovStationData getNearest(LatLng position) {
-        if (isEmpty()) {
-            return null;
-        }
-
-        final Iterator<VelovStationData> it = mStations.iterator();
-
-        VelovStationData nearest = it.next();
-        double nearestDistance = LatLngUtils.computeDistance(position, nearest.getPosition());
-
-        while (it.hasNext()) {
-            VelovStationData station = it.next();
-            double distance = LatLngUtils.computeDistance(position, station.getPosition());
-
-            if (distance < nearestDistance) {
-                nearest = station;
-                nearestDistance = distance;
-            }
-        }
-
-        return nearest;
     }
 
     public void setComparator(Comparator<VelovStationData> comparator) {
@@ -198,11 +172,25 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         }
     }
 
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+
+        this.mFilter = null;
+        this.mComparator = null;
+
+        this.wasLoaded = false;
+
+        this.firstLoadListeners = new LinkedList<>();
+        this.itemUpdateListeners = new LinkedList<>();
+        this.filterUpdateListeners = new LinkedList<>();
+    }
+
     public void addOnFirstLoadListener(FirstLoadListener listener) {
-        if (wasLoaded)
+        if (wasLoaded) {
             listener.onFirstLoad(this);
-        else
+        } else {
             firstLoadListeners.add(listener);
+        }
     }
 
     public void addOnItemsUpdateListener(ItemUpdateListener listener) {
@@ -237,10 +225,12 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
     }
 
     private void notifyFilterUpdate() {
-        List<VelovStationData> filtered = find(mFilter);
+        if (!filterUpdateListeners.isEmpty()) {
+            List<VelovStationData> filtered = find(mFilter);
 
-        for (FilterUpdateListener listener : filterUpdateListeners) {
-            listener.onFilterUpdate(mFilter, filtered, this);
+            for (FilterUpdateListener listener : filterUpdateListeners) {
+                listener.onFilterUpdate(mFilter, filtered, this);
+            }
         }
     }
 
