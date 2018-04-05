@@ -319,9 +319,10 @@ public class MainActivity extends AppCompatActivity
 
         if (requestCode == REQUEST_SHOW_IN_MAP && resultCode == RESULT_OK) {
             VelovStationData station = (VelovStationData) data.getSerializableExtra("station");
+            EditText searchPlate = mSearchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
 
             showFragmentMap();
-            fragmentMap.highlight(station);
+            searchPlate.setText(station.getFullName());
         }
     }
 
