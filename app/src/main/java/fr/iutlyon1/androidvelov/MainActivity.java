@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity
             StationMapFragment.OnMapFragmentInteractionListener {
 
     private DrawerLayout drawer;
+    private NavigationView mNavigationView;
     private SearchView mSearchView;
 
     private StationMapFragment fragmentMap = null;
@@ -76,8 +77,8 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        mNavigationView = findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
 
         mDataset = (VelovData) getIntent().getSerializableExtra("dataset");
         if (mDataset == null) {
@@ -103,7 +104,10 @@ public class MainActivity extends AppCompatActivity
                             this,
                             location -> {
                                 if (fragmentMap != null && location != null)
-                                    fragmentMap.centerOn(location);
+                                    fragmentMap.centerOn(new LatLng(
+                                            location.getLatitude(),
+                                            location.getLongitude()
+                                    ));
                             });
         }
     }
@@ -279,12 +283,16 @@ public class MainActivity extends AppCompatActivity
     private void showFragmentMap() {
         if (this.fragmentMap == null)
             this.fragmentMap = StationMapFragment.newInstance(mDataset);
+
+        mNavigationView.getMenu().findItem(R.id.nav_map).setChecked(true);
         this.startTransactionFragment(this.fragmentMap);
     }
 
     private void showFragmentList() {
         if (this.fragmentList == null)
             this.fragmentList = StationListFragment.newInstance(mDataset);
+
+        mNavigationView.getMenu().findItem(R.id.nav_list).setChecked(true);
         this.startTransactionFragment(this.fragmentList);
     }
 
@@ -297,10 +305,25 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private static final int REQUEST_SHOW_IN_MAP = 1;
+
     private void showStationDetails(VelovStationData station) {
         Intent intent = new Intent(MainActivity.this, StationDetailActivity.class);
         intent.putExtra("station", station);
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_SHOW_IN_MAP);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_SHOW_IN_MAP && resultCode == RESULT_OK) {
+            VelovStationData station = (VelovStationData) data.getSerializableExtra("station");
+            EditText searchPlate = mSearchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+
+            showFragmentMap();
+            searchPlate.setText(station.getFullName());
+        }
     }
 
     @Override

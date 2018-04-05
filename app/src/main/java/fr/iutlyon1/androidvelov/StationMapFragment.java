@@ -2,14 +2,12 @@ package fr.iutlyon1.androidvelov;
 
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +18,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.maps.android.clustering.ClusterManager;
@@ -99,7 +98,7 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
             startActivity(mapIntent);
         });
 
-        // Listners
+        // Listeners
         selectedStation.addOnChangeListener((old, nu) -> {
             if (nu != null)
                 AnimUtils.slideIn(mGotoStation);
@@ -118,10 +117,15 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    private CameraPosition lastCameraPosition = null;
+
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        if (mMap != null) {
+            lastCameraPosition = mMap.getCameraPosition();
+        }
     }
 
     @Override
@@ -137,6 +141,10 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
 
         if (PermissionUtils.checkLocationPermission(getActivity())) {
             mMap.setMyLocationEnabled(true);
+        }
+
+        if (lastCameraPosition != null) {
+            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(lastCameraPosition));
         }
 
         mMap.setOnMapClickListener(latLng -> selectedStation.set(null));
@@ -174,23 +182,25 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
 
     private final static float DEFAULT_ZOOM = 16.5f;
 
-    public void centerOn(@NonNull Location location) {
+    public void centerOn(@NonNull LatLng location) {
         if (mMap != null) {
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
         }
     }
 
-    private void updateGoogleMap(List<VelovStationData> stations) {
+    private void updateGoogleMap(@NonNull List<VelovStationData> stations) {
         if (mMap != null && mClusterManager != null) {
             mClusterManager.clearItems();
             mClusterManager.addItems(stations);
             mClusterManager.cluster();
 
-            selectedStation.set(stations.size() == 1 ?
-                stations.get(0)
-                : null);
+            if (stations.size() == 1) {
+                VelovStationData station = stations.get(0);
+                selectedStation.set(station);
+                centerOn(station.getPosition());
+            } else {
+                selectedStation.set(null);
+            }
         }
     }
 
