@@ -255,9 +255,8 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         this.mStations.clear();
         this.mStations.addAll(c);
 
-        if (mComparator != null) {
+        if (mComparator != null)
             Collections.sort(mStations, mComparator);
-        }
 
         if (!wasLoaded)
             notifyFirstLoad();

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -22,28 +23,42 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
+import fr.iutlyon1.androidvelov.utils.LatLngUtils;
+import fr.iutlyon1.androidvelov.utils.PermissionUtils;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
             StationListFragment.OnListFragmentInteractionListener,
             StationMapFragment.OnMapFragmentInteractionListener {
+
     private DrawerLayout drawer;
     private SearchView mSearchView;
 
-    private Fragment fragmentMap = null;
-    private Fragment fragmentList = null;
-
+    private StationMapFragment fragmentMap = null;
+    private StationListFragment fragmentList = null;
     private VelovData mDataset;
+
+    private LocationRequest mLocationRequest;
+    private FusedLocationProviderClient mFusedLocationClient;
+    private LocationCallback mLocationCallback;
 
     public MainActivity() {
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,18 +85,66 @@ public class MainActivity extends AppCompatActivity
         }
 
         showFragmentMap();
+
+        initLocationService();
+    }
+
+    private void initLocationService() {
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        mLocationRequest = LocationRequest.create();
+        mLocationRequest.setInterval(20000);
+        mLocationRequest.setFastestInterval(10000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+        if (PermissionUtils.checkLocationPermission(this)) {
+            mFusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(
+                            this,
+                            location -> {
+                                if (fragmentMap != null && location != null)
+                                    fragmentMap.centerOn(location);
+                            });
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
         mDataset.load(this, null);
+
+        if (!PermissionUtils.checkLocationPermission(this)) {
+            updateLocation(null);
+        } else {
+            mLocationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    if (locationResult == null) {
+                        return;
+                    }
+                    updateLocation(locationResult.getLastLocation());
+                }
+            };
+
+            mFusedLocationClient.requestLocationUpdates(
+                    mLocationRequest,
+                    mLocationCallback,
+                    null);
+        }
     }
 
     @Override
     protected void onStop() {
         mDataset.save(this);
+
         super.onStop();
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
     }
 
     @Override
@@ -133,7 +196,6 @@ public class MainActivity extends AppCompatActivity
                 }
             });
 
-
             mDataset.addOnFilterUpdateListener((filter, filteredStations, dataset) -> {
                 Cursor cursor = generateCursor(filteredStations);
 
@@ -155,6 +217,32 @@ public class MainActivity extends AppCompatActivity
         }
 
         return cursor;
+    }
+
+    private void updateLocation(Location location) {
+        if (location != null) {
+            // Update dataset
+            LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+            mDataset.setComparator((s1, s2) -> {
+                double dist1 = LatLngUtils.computeDistance(
+                        currentLatLng,
+                        s1.getPosition()
+                );
+                double dist2 = LatLngUtils.computeDistance(
+                        currentLatLng,
+                        s2.getPosition()
+                );
+
+                double diff = dist1 - dist2;
+                if (-1. < diff && diff != 0 && diff < 1.) {
+                    return diff > 0 ? 1 : -1;
+                }
+
+                return (int) diff;
+            });
+        } else {
+            mDataset.setComparator((s1, s2) -> s1.getName().compareToIgnoreCase(s2.getName()));
+        }
     }
 
     @Override

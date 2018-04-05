@@ -2,11 +2,14 @@ package fr.iutlyon1.androidvelov;
 
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +21,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.maps.android.clustering.ClusterManager;
 
@@ -29,8 +31,7 @@ import fr.iutlyon1.androidvelov.display.VelovClusterRenderer;
 import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
 import fr.iutlyon1.androidvelov.utils.AnimUtils;
-import fr.iutlyon1.androidvelov.utils.LatLngUtils;
-import fr.iutlyon1.androidvelov.utils.MapUtils;
+import fr.iutlyon1.androidvelov.utils.PermissionUtils;
 import fr.iutlyon1.androidvelov.utils.Property;
 
 public class StationMapFragment extends Fragment implements OnMapReadyCallback {
@@ -74,7 +75,7 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-                            @Nullable Bundle savedInstanceState) {
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_station_map, container, false);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -129,22 +130,18 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
 
         initGoogleMap();
         initClusterManager();
-
-        mDataset.addOnFirstLoadListener((velovData) -> {
-            if (!velovData.isEmpty()) {
-                LatLngBounds bounds = LatLngUtils.computeBounds(velovData.getStations());
-                map.moveCamera(
-                        CameraUpdateFactory.newLatLngBounds(bounds, MapUtils.MAP_PADDING));
-            }
-
-            velovData.addOnFilterUpdateListener((filter, filteredStations, dataset)
-                    -> updateGoogleMap(filteredStations));
-        });
     }
 
     private void initGoogleMap() {
         mMap.getUiSettings().setMapToolbarEnabled(false);
+
+        if (PermissionUtils.checkLocationPermission(getActivity())) {
+            mMap.setMyLocationEnabled(true);
+        }
+
         mMap.setOnMapClickListener(latLng -> selectedStation.set(null));
+        mDataset.addOnFilterUpdateListener((filter, filteredStations, dataset) ->
+                updateGoogleMap(filteredStations));
     }
 
     private void initClusterManager() {
@@ -175,23 +172,25 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
         mMap.setInfoWindowAdapter(mClusterManager.getMarkerManager());
     }
 
+    private final static float DEFAULT_ZOOM = 16.5f;
+
+    public void centerOn(@NonNull Location location) {
+        if (mMap != null) {
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
+        }
+    }
+
     private void updateGoogleMap(List<VelovStationData> stations) {
         if (mMap != null && mClusterManager != null) {
             mClusterManager.clearItems();
-            mClusterManager.addItems(mDataset.getStations());
-
-            mClusterManager.clearItems();
             mClusterManager.addItems(stations);
+            mClusterManager.cluster();
 
-            if (!stations.isEmpty()) {
-                LatLngBounds bounds = LatLngUtils.computeBounds(stations);
-                mMap.animateCamera(
-                        CameraUpdateFactory.newLatLngBounds(bounds, MapUtils.MAP_PADDING));
-
-                selectedStation.set(stations.size() == 1 ?
-                    stations.get(0)
-                    : null);
-            }
+            selectedStation.set(stations.size() == 1 ?
+                stations.get(0)
+                : null);
         }
     }
 
