@@ -185,16 +185,12 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
     private void updateGoogleMap(List<VelovStationData> stations) {
         if (mMap != null && mClusterManager != null) {
             mClusterManager.clearItems();
-            mClusterManager.addItems(mDataset.getStations());
-
-            mClusterManager.clearItems();
             mClusterManager.addItems(stations);
+            mClusterManager.cluster();
 
-            if (!stations.isEmpty()) {
-                selectedStation.set(stations.size() == 1 ?
-                    stations.get(0)
-                    : null);
-            }
+            selectedStation.set(stations.size() == 1 ?
+                stations.get(0)
+                : null);
         }
     }
 
