@@ -1,15 +1,9 @@
 package fr.iutlyon1.androidvelov;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,14 +11,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
-
 import fr.iutlyon1.androidvelov.display.StationRecyclerViewAdapter;
 import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
-import fr.iutlyon1.androidvelov.utils.LatLngUtils;
 
 /**
  * A fragment representing a list of Items.
@@ -68,7 +57,6 @@ public class StationListFragment extends Fragment {
         }
 
         mDataset = (VelovData) args.getSerializable("dataset");
-        //ajouter mLocation
     }
 
     @Override
@@ -86,22 +74,15 @@ public class StationListFragment extends Fragment {
         StationRecyclerViewAdapter mAdapter = new StationRecyclerViewAdapter(mDataset, mListener);
         recyclerView.setAdapter(mAdapter);
 
-        swipeRefresh.setOnRefreshListener(() -> {
-            mDataset.load(
-                    context,
-                    (dataset) -> swipeRefresh.setRefreshing(false)
-            );
-        });
+        swipeRefresh.setOnRefreshListener(() ->
+                mDataset.load(
+                        context,
+                        (dataset) -> swipeRefresh.setRefreshing(false)
+                )
+        );
 
         return swipeRefresh;
     }
-
-
-
-
-
-
-
 
     @Override
     public void onAttach(Context context) {

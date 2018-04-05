@@ -23,7 +23,7 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
         void onTaskCompleted(VelovData fetched);
     }
 
-    private static final String TAG = "XTK";
+    private static final String TAG = "VelovRequest";
     private static final String API_URL = "https://api.jcdecaux.com/vls/v1/stations";
 
     private WeakReference<Context> context;

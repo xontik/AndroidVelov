@@ -94,32 +94,7 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         return stations;
     }
 
-    public VelovStationData getNearest(LatLng position) {
-        if (isEmpty()) {
-            return null;
-        }
-
-        final Iterator<VelovStationData> it = mStations.iterator();
-
-        VelovStationData nearest = it.next();
-        double nearestDistance = LatLngUtils.computeDistance(position, nearest.getPosition());
-
-        while (it.hasNext()) {
-            VelovStationData station = it.next();
-            double distance = LatLngUtils.computeDistance(position, station.getPosition());
-
-            if (distance < nearestDistance) {
-                nearest = station;
-                nearestDistance = distance;
-            }
-        }
-
-        return nearest;
-    }
-
     public void setComparator(Comparator<VelovStationData> comparator) {
-        Log.i("XTK","VelovData : setComparator : " + comparator);
-
         mComparator = (s1, s2) -> {
             if (s1.isFavorite() != s2.isFavorite()) {
                 return s1.isFavorite() ? -1 : 1;
@@ -132,14 +107,7 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
             return 0;
         };
 
-
-    }
-
-    public void sort(){
-        Log.i("XTK","sorting dataset whith" + mComparator);
-        if (mComparator != null) {
-            Collections.sort(mStations, mComparator);
-        }
+        Collections.sort(mStations, mComparator);
         notifyItemsUpdated();
     }
 
@@ -274,7 +242,8 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         this.mStations.clear();
         this.mStations.addAll(c);
 
-        sort();
+        if (mComparator != null)
+            Collections.sort(mStations, mComparator);
 
         if (!wasLoaded)
             notifyFirstLoad();
