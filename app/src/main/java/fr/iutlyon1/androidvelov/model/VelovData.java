@@ -118,6 +118,8 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
     }
 
     public void setComparator(Comparator<VelovStationData> comparator) {
+        Log.i("XTK","VelovData : setComparator : " + comparator);
+
         mComparator = (s1, s2) -> {
             if (s1.isFavorite() != s2.isFavorite()) {
                 return s1.isFavorite() ? -1 : 1;
@@ -130,7 +132,14 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
             return 0;
         };
 
-        Collections.sort(mStations, mComparator);
+
+    }
+
+    public void sort(){
+        Log.i("XTK","sorting dataset whith" + mComparator);
+        if (mComparator != null) {
+            Collections.sort(mStations, mComparator);
+        }
         notifyItemsUpdated();
     }
 
@@ -265,9 +274,7 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         this.mStations.clear();
         this.mStations.addAll(c);
 
-        if (mComparator != null) {
-            Collections.sort(mStations, mComparator);
-        }
+        sort();
 
         if (!wasLoaded)
             notifyFirstLoad();

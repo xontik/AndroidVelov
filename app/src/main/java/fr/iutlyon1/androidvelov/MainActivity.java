@@ -1,26 +1,40 @@
 package fr.iutlyon1.androidvelov;
 
+import android.Manifest;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +42,7 @@ import java.util.Set;
 
 import fr.iutlyon1.androidvelov.model.VelovData;
 import fr.iutlyon1.androidvelov.model.VelovStationData;
+import fr.iutlyon1.androidvelov.utils.LatLngUtils;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -38,8 +53,10 @@ public class MainActivity extends AppCompatActivity
 
     private Fragment fragmentMap = null;
     private Fragment fragmentList = null;
-
+    private LocationCallback mLocationCallback;
     private VelovData mDataset;
+    private FusedLocationProviderClient mFusedLocationClient;
+
 
     public MainActivity() {
         mDataset = new VelovData();
@@ -64,6 +81,8 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
 
         showFragmentMap();
     }
@@ -71,13 +90,55 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        Log.i("XTK","onresume");
+
         mDataset.load(this, null);
+
+        if(!checkLocationPermission()){
+            Log.i("XTK","We have no permission for location");
+            refreshComparator(null);
+        } else {
+            Log.i("XTK","We got permission");
+            mLocationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    Log.i("XTK", "Updating location");
+                    if (locationResult == null) {
+                        refreshComparator(null);
+                        return;
+                    }
+                    refreshComparator(locationResult.getLastLocation());
+                }
+            };
+
+            mFusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            // Got last known location. In some rare situations this can be null.
+                            if (location != null) {
+                                refreshComparator(location);
+                            }
+                        }
+                    });
+
+        }
+
+
     }
 
     @Override
     protected void onStop() {
         mDataset.save(this);
+
         super.onStop();
+    }
+    @Override
+    protected void onPause(){
+        if(mLocationCallback != null){
+            mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        }
+        super.onPause();
     }
 
     @Override
@@ -249,5 +310,74 @@ public class MainActivity extends AppCompatActivity
 
         mDataset.set(position, station);
         return false;
+    }
+
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+
+    private void refreshComparator(Location location) {
+        Log.i("XTK","refreshComparator : " + location);
+        if(location != null) {
+            LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+            mDataset.setComparator((s1, s2) -> {
+                double dist1 = LatLngUtils.computeDistance(
+                        currentLatLng,
+                        s1.getPosition()
+                );
+                double dist2 = LatLngUtils.computeDistance(
+                        currentLatLng,
+                        s2.getPosition()
+                );
+
+                double diff = dist1 - dist2;
+                if (-1. < diff && diff != 0 && diff < 1.) {
+                    return diff > 0 ? 1 : -1;
+                }
+
+                return (int) diff;
+            });
+        } else {
+            mDataset.setComparator((s1, s2) -> s1.getName().compareToIgnoreCase(s2.getName()));
+        }
+        mDataset.sort();
+    }
+
+    public boolean checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(
+                getApplicationContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+            )) {
+                // Show an explanation to the user asynchronously. After the user
+                // sees the explanation, try again to request the permission.
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.title_location_permission)
+                        .setMessage(R.string.text_location_permission)
+                        .setPositiveButton(R.string.dialog_ok, (dialogInterface, i) -> {
+                            //Prompt the user once explanation has been shown
+                            ActivityCompat.requestPermissions(
+                                    this,
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                    MY_PERMISSIONS_REQUEST_LOCATION);
+                        })
+                        .create()
+                        .show();
+
+
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_LOCATION);
+            }
+            return false;
+        } else {
+            return true;
+        }
     }
 }
