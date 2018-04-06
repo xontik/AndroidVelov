@@ -48,8 +48,10 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         this.mStations = new ArrayList<>();
         this.mFilter = null;
 
-
         this.filterUpdateListeners = new LinkedList<>();
+
+        this.setComparator((s1, s2) ->
+                s1.getFullName().compareToIgnoreCase(s2.getFullName()));
     }
 
     public void set(int index, VelovStationData item) throws IndexOutOfBoundsException {
@@ -73,17 +75,13 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         return stations;
     }
 
-    public void setComparator(Comparator<VelovStationData> comparator) {
+    public void setComparator(@NonNull Comparator<VelovStationData> comparator) {
         mComparator = (s1, s2) -> {
             if (s1.isFavorite() != s2.isFavorite()) {
                 return s1.isFavorite() ? -1 : 1;
             }
 
-            if (comparator != null) {
-                return comparator.compare(s1, s2);
-            }
-
-            return 0;
+            return comparator.compare(s1, s2);
         };
 
         Collections.sort(mStations, mComparator);
@@ -116,6 +114,9 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
             Toast.makeText(context, R.string.toast_loadSavedData , Toast.LENGTH_SHORT)
                     .show();
             loadFromSave(context);
+
+            if (onTaskCompleted != null)
+                onTaskCompleted.onTaskCompleted(this);
         }
     }
 

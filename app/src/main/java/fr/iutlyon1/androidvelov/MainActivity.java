@@ -118,9 +118,7 @@ public class MainActivity extends AppCompatActivity
 
         mDataset.load(this, null);
 
-        if (!PermissionUtils.checkLocationPermission(this)) {
-            updateLocation(null);
-        } else {
+        if (PermissionUtils.checkLocationPermission(this)) {
             mLocationCallback = new LocationCallback() {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
@@ -223,30 +221,26 @@ public class MainActivity extends AppCompatActivity
         return cursor;
     }
 
-    private void updateLocation(Location location) {
-        if (location != null) {
-            // Update dataset
-            LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-            mDataset.setComparator((s1, s2) -> {
-                double dist1 = LatLngUtils.computeDistance(
-                        currentLatLng,
-                        s1.getPosition()
-                );
-                double dist2 = LatLngUtils.computeDistance(
-                        currentLatLng,
-                        s2.getPosition()
-                );
+    private void updateLocation(@NonNull Location location) {
+        // Update dataset
+        LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+        mDataset.setComparator((s1, s2) -> {
+            double dist1 = LatLngUtils.computeDistance(
+                    currentLatLng,
+                    s1.getPosition()
+            );
+            double dist2 = LatLngUtils.computeDistance(
+                    currentLatLng,
+                    s2.getPosition()
+            );
 
-                double diff = dist1 - dist2;
-                if (-1. < diff && diff != 0 && diff < 1.) {
-                    return diff > 0 ? 1 : -1;
-                }
+            double diff = dist1 - dist2;
+            if (-1. < diff && diff != 0 && diff < 1.) {
+                return diff > 0 ? 1 : -1;
+            }
 
-                return (int) diff;
-            });
-        } else {
-            mDataset.setComparator((s1, s2) -> s1.getName().compareToIgnoreCase(s2.getName()));
-        }
+            return (int) diff;
+        });
     }
 
     @Override

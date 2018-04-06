@@ -88,6 +88,10 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
             if (context != null) {
                 InternetUtils.showConnectionDialog(context);
             }
+
+            if (listener != null) {
+                listener.onTaskCompleted(null);
+            }
             return;
         }
 

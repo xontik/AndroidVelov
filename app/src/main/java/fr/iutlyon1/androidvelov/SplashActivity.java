@@ -19,12 +19,10 @@ public class SplashActivity extends AppCompatActivity {
 
         VelovData dataset = new VelovData();
 
-        VelovRequest request = new VelovRequest(
-                this,
-                "Lyon",
+        dataset.load(
+                getApplicationContext(),
                 this::startIntent
-            );
-        request.execute(dataset);
+        );
 
         new Handler().postDelayed(
                 () -> startIntent(dataset),
@@ -34,7 +32,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void startIntent(VelovData dataset) {
-        if (!mainIntentStarted) {
+        if (dataset != null && !mainIntentStarted) {
             mainIntentStarted = true;
 
             Intent intent = new Intent(this, MainActivity.class);
