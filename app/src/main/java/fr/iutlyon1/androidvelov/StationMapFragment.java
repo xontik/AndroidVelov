@@ -178,6 +178,8 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
         mMap.setOnMarkerClickListener(mClusterManager);
         mMap.setOnInfoWindowClickListener(mClusterManager);
         mMap.setInfoWindowAdapter(mClusterManager.getMarkerManager());
+
+        updateGoogleMap(mDataset.find(mDataset.getFilter()));
     }
 
     private final static float DEFAULT_ZOOM = 16.5f;
