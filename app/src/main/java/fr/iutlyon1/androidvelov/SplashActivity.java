@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 
-import fr.iutlyon1.androidvelov.api.VelovRequest;
 import fr.iutlyon1.androidvelov.model.VelovData;
 
 public class SplashActivity extends AppCompatActivity {
@@ -21,7 +20,8 @@ public class SplashActivity extends AppCompatActivity {
 
         dataset.load(
                 getApplicationContext(),
-                this::startIntent
+                this::startIntent,
+                true
         );
 
         new Handler().postDelayed(

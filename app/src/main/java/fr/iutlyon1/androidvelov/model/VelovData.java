@@ -115,8 +115,9 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
                     .show();
             loadFromSave(context);
 
-            if (onTaskCompleted != null)
+            if (onTaskCompleted != null) {
                 onTaskCompleted.onTaskCompleted(this);
+            }
         }
     }
 

@@ -19,6 +19,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -123,9 +124,10 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
                     if (locationResult == null) {
-                        return;
+                        updateLocation(null);
+                    } else {
+                        updateLocation(locationResult.getLastLocation());
                     }
-                    updateLocation(locationResult.getLastLocation());
                 }
             };
 
@@ -221,7 +223,13 @@ public class MainActivity extends AppCompatActivity
         return cursor;
     }
 
-    private void updateLocation(@NonNull Location location) {
+    private void updateLocation(Location location) {
+        if (location == null) {
+            mDataset.setComparator((s1, s2) ->
+                    s1.getName().compareToIgnoreCase(s2.getName()));
+            return;
+        }
+
         // Update dataset
         LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
         mDataset.setComparator((s1, s2) -> {
@@ -234,12 +242,7 @@ public class MainActivity extends AppCompatActivity
                     s2.getPosition()
             );
 
-            double diff = dist1 - dist2;
-            if (-1. < diff && diff != 0 && diff < 1.) {
-                return diff > 0 ? 1 : -1;
-            }
-
-            return (int) diff;
+            return Double.compare(dist1, dist2);
         });
     }
 
