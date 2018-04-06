@@ -85,7 +85,7 @@ public class VelovStationData implements Serializable, ClusterItem {
         this.availableBikeStands = in.readInt();
         this.availableBikes = in.readInt();
         this.lastUpdate = (Date) in.readObject();
-        this.favorite = in.readBoolean();
+        this.favorite = false;
     }
 
     public int getNumber() {

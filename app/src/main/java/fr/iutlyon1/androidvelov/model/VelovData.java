@@ -142,7 +142,9 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         }
 
         if (savedData != null) {
-            this.setAll(savedData.getStations());
+            List<VelovStationData> stations = savedData.getStations();
+            processFavorites(context, stations);
+            this.setAll(stations);
         }
     }
 
@@ -163,6 +165,10 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
     }
 
     public void processFavorites(@NonNull Context context) {
+        processFavorites(context, this.mStations);
+    }
+
+    private void processFavorites(@NonNull Context context, List<VelovStationData> stations) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 context.getString(R.string.sharedPrefFile),
                 Context.MODE_PRIVATE);
@@ -171,7 +177,7 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
                 context.getString(R.string.sharedPrefFavorites),
                 new HashSet<>());
 
-        for (VelovStationData station : this.mStations) {
+        for (VelovStationData station : stations) {
             station.setFavorite(
                     favoritesString.contains(String.valueOf(station.getNumber()))
             );
