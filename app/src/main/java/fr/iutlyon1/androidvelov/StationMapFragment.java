@@ -1,13 +1,16 @@
 package fr.iutlyon1.androidvelov;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -139,7 +142,10 @@ public class StationMapFragment extends Fragment implements OnMapReadyCallback {
     private void initGoogleMap() {
         mMap.getUiSettings().setMapToolbarEnabled(false);
 
-        if (PermissionUtils.checkLocationPermission(getActivity())) {
+        if (ContextCompat.checkSelfPermission(
+                getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
         }
 

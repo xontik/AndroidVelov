@@ -13,7 +13,7 @@ public class PermissionUtils {
     private PermissionUtils() {
     }
 
-    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+    public static final int PERMISSIONS_REQUEST_LOCATION = 99;
 
     public static boolean checkLocationPermission(Activity activity) {
         if (ContextCompat.checkSelfPermission(
@@ -35,17 +35,16 @@ public class PermissionUtils {
                             //Prompt the user once explanation has been shown
                             ActivityCompat.requestPermissions(
                                     activity,
-                                    new String[]{ Manifest.permission.ACCESS_FINE_LOCATION },
-                                    MY_PERMISSIONS_REQUEST_LOCATION);
+                                    new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
+                                    PERMISSIONS_REQUEST_LOCATION);
                         })
-                        .create()
                         .show();
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(
                         activity,
-                        new String[]{ Manifest.permission.ACCESS_FINE_LOCATION },
-                        MY_PERMISSIONS_REQUEST_LOCATION);
+                        new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
+                        PERMISSIONS_REQUEST_LOCATION);
             }
             return false;
         } else {
