@@ -168,7 +168,7 @@ public class VelovData implements Iterable<VelovStationData>, Serializable {
         processFavorites(context, this.mStations);
     }
 
-    private void processFavorites(@NonNull Context context, List<VelovStationData> stations) {
+    public static void processFavorites(@NonNull Context context, List<VelovStationData> stations) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 context.getString(R.string.sharedPrefFile),
                 Context.MODE_PRIVATE);

@@ -11,11 +11,13 @@ import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import fr.iutlyon1.androidvelov.Props;
 import fr.iutlyon1.androidvelov.model.VelovData;
+import fr.iutlyon1.androidvelov.model.VelovStationData;
 import fr.iutlyon1.androidvelov.utils.InternetUtils;
 
 public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
@@ -95,10 +97,15 @@ public class VelovRequest extends AsyncTask<VelovData, Void, VelovData> {
             return;
         }
 
-        velovData.processFavorites(this.context.get());
+        List<VelovStationData> stations = velovData.getStations();
+
+        Context context = this.context.get();
+        if (context != null) {
+            VelovData.processFavorites(this.context.get(), stations);
+        }
 
         for (VelovData data : this.datas) {
-            data.setAll(velovData.getStations());
+            data.setAll(stations);
         }
 
         if (listener != null) {
